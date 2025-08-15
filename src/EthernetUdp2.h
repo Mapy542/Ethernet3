@@ -63,8 +63,10 @@ private:
   Ethernet3Class* _ethernet; // Pointer to specific Ethernet3Class instance
 
 public:
-  EthernetUDP();  // Constructor (uses global Ethernet instance for backward compatibility)
-  EthernetUDP(Ethernet3Class* ethernet); // Constructor with specific Ethernet3Class instance
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+  EthernetUDP();  // Backward compatibility constructor (uses global Ethernet instance)
+#endif
+  EthernetUDP(Ethernet3Class* ethernet); // Modern multi-instance constructor
   virtual uint8_t begin(uint16_t);	// initialize, start listening on specified port. Returns 1 if successful, 0 if there are no sockets available to use
   virtual void stop();  // Finish with the UDP socket
 

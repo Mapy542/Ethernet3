@@ -4,16 +4,24 @@ extern "C" {
 #include "string.h"
 }
 
-#include "Ethernet2.h"
-#include "Ethernet3.h"  // Add Ethernet3 for multi-instance support
+#include "Ethernet3.h"  // Modern multi-instance support
 #include "EthernetClient.h"
 #include "EthernetServer.h"
 
+// Backward compatibility includes
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+#include "Ethernet2.h"
+#endif
+
+// Constructors
+
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
 EthernetServer::EthernetServer(uint16_t port)
 {
   _port = port;
   _ethernet = nullptr;  // Will use global instance
 }
+#endif
 
 EthernetServer::EthernetServer(uint16_t port, Ethernet3Class* ethernet_instance)
 {
@@ -23,7 +31,11 @@ EthernetServer::EthernetServer(uint16_t port, Ethernet3Class* ethernet_instance)
 
 // Helper method for multi-instance support
 Ethernet3Class* EthernetServer::getEthernetInstance() {
-  return _ethernet ? _ethernet : &Ethernet;  // Fallback to global instance
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+  return _ethernet ? _ethernet : &Ethernet;  // Fallback to global instance when backward compatibility enabled
+#else
+  return _ethernet;  // Must have been provided in constructor
+#endif
 }
 
 void EthernetServer::begin()

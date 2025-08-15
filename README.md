@@ -9,6 +9,22 @@ A modernized Ethernet library with multi-instance architecture, W5100/W5500 supp
 
 ## 🚀 Key Features
 
+### Flexible Backward Compatibility
+Choose between modern multi-instance API or full Ethernet/Ethernet2 compatibility:
+
+```cpp
+// Legacy code works unchanged (default)
+#include <Ethernet3.h>
+Ethernet.begin(mac);
+EthernetServer server(80);
+
+// Or use modern explicit instances  
+#define ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+#include <Ethernet3.h>
+Ethernet3Class eth(CHIP_TYPE_W5500, 10);
+EthernetServer server(80, &eth);
+```
+
 ### Multi-Instance Architecture
 Use multiple Ethernet chips simultaneously:
 ```cpp
@@ -98,6 +114,7 @@ void loop() {
 ## 📚 Documentation
 
 - **[Getting Started](docs/getting-started.md)** - Installation and basic usage
+- **[Backward Compatibility](docs/BACKWARDS_COMPATIBILITY.md)** - Legacy API support and migration
 - **[Multi-Instance Architecture](docs/multi-instance.md)** - Using multiple Ethernet chips
 - **[UDP Multicast](docs/udp-multicast.md)** - Group communication
 - **[Platform Support](docs/platform-support.md)** - Arduino, ESP32, STM32 optimizations

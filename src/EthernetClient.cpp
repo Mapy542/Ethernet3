@@ -7,27 +7,40 @@ extern "C" {
 
 #include "Arduino.h"
 
-#include "Ethernet2.h"
-#include "Ethernet3.h"  // Add Ethernet3 for multi-instance support
+#include "Ethernet3.h"  // Modern multi-instance support
 #include "EthernetClient.h"
 #include "EthernetServer.h"
 #include "Dns.h"
 
-// Remove static variable - now instance-based
-// uint16_t EthernetClient::_srcport = 1024;
+// Backward compatibility includes
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+#include "Ethernet2.h"
+#endif
 
+// Constructors
+
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
 EthernetClient::EthernetClient() : _sock(MAX_SOCK_NUM), _srcport(1024), _ethernet(nullptr) {
 }
 
 EthernetClient::EthernetClient(uint8_t sock) : _sock(sock), _srcport(1024), _ethernet(nullptr) {
 }
+#endif
 
 EthernetClient::EthernetClient(Ethernet3Class* ethernet_instance) : _sock(MAX_SOCK_NUM), _srcport(1024), _ethernet(ethernet_instance) {
+  if (!ethernet_instance) {
+    // Throw error or handle gracefully - instance is required
+    // For Arduino, we'll just set to null and handle in getEthernetInstance
+  }
 }
 
 // Helper methods for multi-instance support
 Ethernet3Class* EthernetClient::getEthernetInstance() {
-  return _ethernet ? _ethernet : &Ethernet;  // Fallback to global instance
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+  return _ethernet ? _ethernet : &Ethernet;  // Fallback to global instance when backward compatibility enabled
+#else
+  return _ethernet;  // Must have been provided in constructor
+#endif
 }
 
 uint8_t EthernetClient::getMaxSockets() {

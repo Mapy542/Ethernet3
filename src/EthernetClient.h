@@ -11,9 +11,11 @@ class Ethernet3Class;
 class EthernetClient : public Client {
 
 public:
-  EthernetClient();
-  EthernetClient(uint8_t sock);
-  EthernetClient(Ethernet3Class* ethernet_instance);  // Multi-instance constructor
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+  EthernetClient();  // Backward compatibility constructor (uses global Ethernet)
+  EthernetClient(uint8_t sock);  // Backward compatibility with socket number
+#endif
+  EthernetClient(Ethernet3Class* ethernet_instance);  // Modern multi-instance constructor
 
   uint8_t status();
   virtual int connect(IPAddress ip, uint16_t port);

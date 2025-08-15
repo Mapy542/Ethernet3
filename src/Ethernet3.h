@@ -1,8 +1,12 @@
 /*
  * Ethernet3.h - Enhanced Ethernet class with multi-instance support
  * 
- * This file provides backward compatibility while enabling multi-instance architecture
- * Built on Ethernet2 foundation with modernization enhancements
+ * Modern multi-instance Ethernet library built on Ethernet2 foundation
+ * 
+ * Backward Compatibility:
+ * - By default, provides backward compatibility with legacy Ethernet/Ethernet2 code
+ * - Define ETHERNET3_NO_BACKWARDS_COMPATIBILITY to disable singleton instances
+ * - When disabled, all network classes require an Ethernet3Class instance
  */
 
 #ifndef ETHERNET3_H
@@ -17,13 +21,15 @@
 #include "hal/ArduinoHAL.h"
 #include "bus/ArduinoSPIBus.h"
 #include "IPAddress.h"
-#include "EthernetClient.h"
-#include "EthernetServer.h"
-#include "Dhcp.h"
+
+// Forward declarations  
+class EthernetClient;
+class EthernetServer;
+class DhcpClass;
 
 /**
  * Enhanced EthernetClass with multi-instance support
- * Maintains backward compatibility with existing Ethernet2 API
+ * Modern replacement for singleton-based Ethernet/Ethernet2 libraries
  */
 class Ethernet3Class {
 private:
@@ -47,11 +53,14 @@ private:
     bool _owns_chip;  // Whether this instance owns the chip/bus/hal objects
     
 public:
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
     /**
      * Default constructor for backward compatibility
+     * Only available when ETHERNET3_NO_BACKWARDS_COMPATIBILITY is not defined
      * Uses global W5500 instance
      */
     Ethernet3Class();
+#endif
     
     /**
      * Constructor with specific chip instance
@@ -171,21 +180,24 @@ private:
     void cleanup();
 };
 
-// Hardware status constants (for compatibility)
+// Hardware status constants
 #define EthernetNoHardware 0
 #define EthernetW5100      1
 #define EthernetW5200      2
 #define EthernetW5500      3
 
-// Link status constants (for compatibility)
+// Link status constants
 #define Unknown    0
 #define LinkON     1
 #define LinkOFF    2
 
-// Global instance for backward compatibility (uses W5500)
-extern Ethernet3Class Ethernet;
-
-// Alias for backward compatibility
-typedef Ethernet3Class EthernetClass;
+// Backward compatibility support (conditional)
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+    // Global instance for backward compatibility with Ethernet/Ethernet2
+    extern Ethernet3Class Ethernet;
+    
+    // Type alias for legacy code compatibility
+    typedef Ethernet3Class EthernetClass;
+#endif
 
 #endif // ETHERNET3_H

@@ -32,13 +32,19 @@
 
 #include "utility/w5500.h"
 #include "utility/socket.h"
-#include "Ethernet2.h"
-#include "Ethernet3.h"  // Add Ethernet3 header for multi-instance support
+#include "Ethernet3.h"  // Modern multi-instance support
 #include "Udp.h"
 #include "Dns.h"
 
-/* Constructor */
+// Backward compatibility includes
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+#include "Ethernet2.h"
+#endif
+
+/* Constructors */
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
 EthernetUDP::EthernetUDP() : _sock(MAX_SOCK_NUM), _ethernet(nullptr) {}
+#endif
 
 /* Constructor with specific Ethernet3Class instance */
 EthernetUDP::EthernetUDP(Ethernet3Class* ethernet) : _sock(MAX_SOCK_NUM), _ethernet(ethernet) {}
@@ -100,8 +106,13 @@ int EthernetUDP::beginPacket(const char *host, uint16_t port)
   if (_ethernet) {
     dns.begin(_ethernet->dnsServerIP());
   } else {
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
     // Backward compatibility - use global Ethernet
     dns.begin(Ethernet.dnsServerIP());
+#else
+    // No backward compatibility - this should not happen
+    return 0;
+#endif
   }
   ret = dns.getHostByName(host, remote_addr);
   if (ret == 1) {

@@ -175,8 +175,10 @@ private:
   Ethernet3Class* getEthernetInstance();
   
 public:
-  DhcpClass();                                // Default constructor (uses global Ethernet)
-  DhcpClass(Ethernet3Class* ethernet_instance);  // Multi-instance constructor
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+  DhcpClass();                                // Backward compatibility constructor (uses global Ethernet)
+#endif
+  DhcpClass(Ethernet3Class* ethernet_instance);  // Modern multi-instance constructor
   
   IPAddress getLocalIp();
   IPAddress getSubnetMask();

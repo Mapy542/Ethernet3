@@ -6,14 +6,21 @@
 #include <string.h>
 #include <stdlib.h>
 #include "Dhcp.h"
-#include "Ethernet3.h"  // Add Ethernet3 for multi-instance support
+#include "Ethernet3.h"  // Modern multi-instance support
 #include "Arduino.h"
 #include "utility/util.h"
 
+// Backward compatibility includes
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+// Include legacy headers if needed
+#endif
+
 // Constructors for multi-instance support
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
 DhcpClass::DhcpClass() : _ethernet(nullptr) {
   // Will use global Ethernet instance
 }
+#endif
 
 DhcpClass::DhcpClass(Ethernet3Class* ethernet_instance) : _ethernet(ethernet_instance) {
   // Use specific Ethernet instance
@@ -21,7 +28,11 @@ DhcpClass::DhcpClass(Ethernet3Class* ethernet_instance) : _ethernet(ethernet_ins
 
 // Helper method for multi-instance support
 Ethernet3Class* DhcpClass::getEthernetInstance() {
-  return _ethernet ? _ethernet : &Ethernet;  // Fallback to global instance
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+  return _ethernet ? _ethernet : &Ethernet;  // Fallback to global instance when backward compatibility enabled
+#else
+  return _ethernet;  // Must have been provided in constructor
+#endif
 }
 
 int DhcpClass::beginWithDHCP(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout)

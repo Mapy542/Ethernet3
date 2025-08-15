@@ -13,8 +13,10 @@ private:
   Ethernet3Class* _ethernet;  // Associated Ethernet instance
   void accept();
 public:
-  EthernetServer(uint16_t);
-  EthernetServer(uint16_t port, Ethernet3Class* ethernet_instance);  // Multi-instance constructor
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+  EthernetServer(uint16_t);  // Backward compatibility constructor (uses global Ethernet)
+#endif
+  EthernetServer(uint16_t port, Ethernet3Class* ethernet_instance);  // Modern multi-instance constructor
   EthernetClient available();
   virtual void begin();
   virtual size_t write(uint8_t);
