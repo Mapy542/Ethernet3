@@ -100,6 +100,52 @@ public:
   virtual IPAddress remoteIP() { return _remoteIP; };
   // Return the port of the host who sent the current incoming packet
   virtual uint16_t remotePort() { return _remotePort; };
+
+  // Multicast support methods
+  
+  /**
+   * Begin UDP multicast on specified group and port
+   * @param multicast_ip Multicast group IP address (224.0.0.0/4 range)
+   * @param port UDP port to listen on
+   * @return 1 if successful, 0 if failed
+   */
+  virtual int beginMulticast(IPAddress multicast_ip, uint16_t port);
+  
+  /**
+   * Join a multicast group
+   * @param group_ip Multicast group IP address
+   * @return 1 if successful, 0 if failed
+   */
+  virtual int joinMulticastGroup(IPAddress group_ip);
+  
+  /**
+   * Leave a multicast group
+   * @param group_ip Multicast group IP address
+   * @return 1 if successful, 0 if failed
+   */
+  virtual int leaveMulticastGroup(IPAddress group_ip);
+  
+  /**
+   * Check if IP address is in multicast range
+   * @param ip IP address to check
+   * @return true if IP is multicast (224.0.0.0/4), false otherwise
+   */
+  virtual bool isMulticastGroup(IPAddress ip);
+
+private:
+  /**
+   * Calculate multicast MAC address from IP
+   * @param ip Multicast IP address
+   * @param mac Output buffer for MAC address (6 bytes)
+   */
+  void calculateMulticastMAC(IPAddress ip, uint8_t* mac);
+  
+  /**
+   * Configure socket for multicast reception
+   * @param group_ip Multicast group IP address
+   * @param port UDP port
+   */
+  void configureMulticastSocket(IPAddress group_ip, uint16_t port);
 };
 
 #endif

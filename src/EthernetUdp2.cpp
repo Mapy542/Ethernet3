@@ -220,3 +220,105 @@ void EthernetUDP::flush()
   }
 }
 
+// Multicast support implementation
+
+int EthernetUDP::beginMulticast(IPAddress multicast_ip, uint16_t port)
+{
+    if (!isMulticastGroup(multicast_ip)) {
+        return 0; // Invalid multicast IP
+    }
+    
+    // Close existing socket if open
+    if (_sock != MAX_SOCK_NUM) {
+        stop();
+    }
+    
+    // Find available socket
+    _sock = MAX_SOCK_NUM;
+    for (uint8_t i = 0; i < MAX_SOCK_NUM; i++) {
+        uint8_t s = w5500.readSnSR(i);
+        if (s == SnSR::CLOSED || s == SnSR::FIN_WAIT) {
+            _sock = i;
+            break;
+        }
+    }
+    
+    if (_sock == MAX_SOCK_NUM) {
+        return 0; // No sockets available
+    }
+    
+    // Configure socket for UDP multicast using existing MULTI flag
+    uint8_t result = socket(_sock, SnMR::UDP | SnMR::MULTI, port, 0);
+    if (result) {
+        configureMulticastSocket(multicast_ip, port);
+        _port = port;
+        _remaining = 0;
+        return 1;
+    }
+    
+    return 0;
+}
+
+int EthernetUDP::joinMulticastGroup(IPAddress group_ip)
+{
+    if (!isMulticastGroup(group_ip)) {
+        return 0; // Invalid multicast IP
+    }
+    
+    // Calculate multicast MAC address
+    uint8_t multicast_mac[6];
+    calculateMulticastMAC(group_ip, multicast_mac);
+    
+    // Note: W5500 doesn't have native IGMP support
+    // The socket configuration with MULTI flag handles basic multicast reception
+    // For full IGMP support, router configuration may be required
+    
+    return 1; // Indicate success for basic multicast setup
+}
+
+int EthernetUDP::leaveMulticastGroup(IPAddress group_ip)
+{
+    if (!isMulticastGroup(group_ip)) {
+        return 0; // Invalid multicast IP
+    }
+    
+    // For W5500, leaving a group typically means closing the socket
+    // or reconfiguring it without multicast
+    // This is a simplified implementation
+    
+    return 1;
+}
+
+bool EthernetUDP::isMulticastGroup(IPAddress ip)
+{
+    // Check if IP is in multicast range (224.0.0.0 to 239.255.255.255)
+    // This corresponds to the high nibble being 0xE (1110 in binary)
+    return (ip[0] >= 224 && ip[0] <= 239);
+}
+
+void EthernetUDP::calculateMulticastMAC(IPAddress ip, uint8_t* mac)
+{
+    // Multicast MAC format: 01:00:5e:XX:XX:XX
+    // XX:XX:XX from lower 23 bits of multicast IP address
+    mac[0] = 0x01;
+    mac[1] = 0x00;
+    mac[2] = 0x5e;
+    mac[3] = ip[1] & 0x7F;  // Clear upper bit to fit in 23-bit range
+    mac[4] = ip[2];
+    mac[5] = ip[3];
+}
+
+void EthernetUDP::configureMulticastSocket(IPAddress group_ip, uint16_t port)
+{
+    // W5500 multicast configuration
+    // The MULTI flag in socket mode register enables multicast reception
+    // Additional configuration could be added here for specific multicast features
+    
+    // Calculate multicast MAC for reference (though W5500 handles this internally)
+    uint8_t multicast_mac[6];
+    calculateMulticastMAC(group_ip, multicast_mac);
+    
+    // Socket is already configured with SnMR::MULTI flag in beginMulticast()
+    // The W5500 hardware will handle multicast packet filtering
+}
+

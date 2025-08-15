@@ -206,4 +206,11 @@ char* EthernetClass::hostName(){
     return _hostName;
 }
 
+bool EthernetClass::linkActive(){
+    // Check physical link status via PHY configuration register
+    // PHYCFGR bit 0 (LNK) indicates link status: 1 = link up, 0 = link down
+    uint8_t phy_cfg = w5500.getPHYCFGR();
+    return (phy_cfg & 0x01) != 0;
+}
+
 EthernetClass Ethernet;

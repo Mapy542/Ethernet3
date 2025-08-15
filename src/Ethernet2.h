@@ -65,6 +65,9 @@ public:
   char* dnsDomainName();
   char* hostName();
 
+  // Link status monitoring - checks physical link state via PHY configuration register
+  bool linkActive();
+
   friend class EthernetClient;
   friend class EthernetServer;
 };
