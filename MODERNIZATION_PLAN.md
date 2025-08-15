@@ -1,7 +1,9 @@
 # Ethernet3 Library Modernization Plan
 
 ## Overview
-This document outlines the plan to modernize the Ethernet3 library by adding missing features from Ethernet1, supporting multiple chip instances, and making it platform-agnostic while maintaining compatibility with existing Ethernet2 functionality.
+This document outlines the plan to modernize the Ethernet3 library (built on Ethernet2 heritage) by adding missing features from Ethernet1, supporting multiple chip instances, and making it platform-agnostic while maintaining compatibility with existing Ethernet2 functionality.
+
+**Note**: This modernization builds upon the Ethernet2 library foundation, which originally supported both W5100 and W5500 chips. We will restore and enhance the W5100 support while ensuring full compatibility between chip types.
 
 ## Current State Analysis
 
@@ -16,8 +18,9 @@ This document outlines the plan to modernize the Ethernet3 library by adding mis
 ### Missing Features (from Ethernet1)
 - **Link Status Checking**: No `bool linkActive()` function to check physical link status
 - **Multiple Instance Support**: Cannot create multiple Ethernet objects for different chips
-- **W5100 Support**: Only supports W5500, missing W5100 compatibility
+- **W5100 Support**: Need to add W5100 compatibility (Ethernet2 had this but it's missing)
 - **Platform Abstraction**: Hard-coded Arduino SPI dependencies
+- **UDP Multicast Support**: Incomplete multicast implementation lacking automatic group management
 
 ### Current Dependencies
 - Arduino SPI library (hard dependency)
@@ -32,7 +35,7 @@ This document outlines the plan to modernize the Ethernet3 library by adding mis
 - **Improved Diagnostics**: Additional status and diagnostic functions
 
 ### 2. Multi-Instance Architecture
-- **Remove Singleton Pattern**: Allow multiple Ethernet instances
+- **Remove Singleton Pattern**: Allow multiple Ethernet instances (EthernetClass, W5500Class, W5100Class, EthernetClient, EthernetServer, DhcpClass)
 - **Bus Abstraction**: Create shared SPI bus management
 - **Chip-Specific Classes**: Separate W5500 and W5100 implementations
 - **Resource Management**: Proper CS pin and socket allocation per instance
@@ -44,9 +47,16 @@ This document outlines the plan to modernize the Ethernet3 library by adding mis
 - **Multi-Platform Testing**: Support Arduino, ESP32, STM32, etc.
 
 ### 4. W5100 Support
-- **W5100 Driver**: Implement W5100 chip support alongside W5500
+- **W5100 Driver**: Restore and enhance W5100 chip support from Ethernet2
 - **Unified Interface**: Common API for both chip types
 - **Feature Parity**: Ensure both chips support same functionality where possible
+
+### 5. UDP Multicast Support
+- **Complete Multicast Implementation**: Build on existing MULTI flag support
+- **Automatic Group Management**: Handle IGMP group joining/leaving
+- **Multicast MAC Calculation**: Automatic conversion from IP to MAC (01:00:5e:XX:XX:XX)
+- **W5500 Multicast Configuration**: Proper IMR and Socket Mode Register setup
+- **Multicast API**: High-level interface for joining/leaving groups and sending/receiving
 
 ## Implementation Plan
 
@@ -96,11 +106,29 @@ This document outlines the plan to modernize the Ethernet3 library by adding mis
    - Add link status detection via PHYCFGR register
 
 2. **W5100 Implementation**
-   - Create W5100Class inheriting from EthernetChip
+   - Restore W5100Class from Ethernet2 heritage, inheriting from EthernetChip
    - Implement W5100-specific register operations
    - Ensure API compatibility with W5500
 
-3. **Link Status Implementation**
+3. **UDP Multicast Support**
+   ```cpp
+   class EthernetUDP {
+   public:
+     // Existing UDP functionality...
+     
+     // New multicast methods
+     int beginMulticast(IPAddress multicast_ip, uint16_t port);
+     int joinMulticastGroup(IPAddress group_ip);
+     int leaveMulticastGroup(IPAddress group_ip);
+     bool isMulticastGroup(IPAddress ip);
+     
+   private:
+     void calculateMulticastMAC(IPAddress ip, uint8_t* mac);
+     void configureMulticastSocket(IPAddress group_ip, uint16_t port);
+   };
+   ```
+
+4. **Link Status Implementation**
    ```cpp
    bool W5500Chip::linkActive() {
      uint8_t phy_cfg = getPHYCFGR();
@@ -114,7 +142,14 @@ This document outlines the plan to modernize the Ethernet3 library by adding mis
    - Add constructor taking chip instance and configuration
    - Implement proper resource management
 
-2. **Example Usage**
+2. **Singleton Classes Refactoring**
+   - **W5500Class**: Remove global instance, make instantiable
+   - **W5100Class**: Design as non-singleton from start
+   - **EthernetClient**: Remove static _srcport, make instance-based
+   - **EthernetServer**: Remove global state dependencies
+   - **DhcpClass**: Make per-instance with separate UDP sockets
+
+3. **Example Usage**
    ```cpp
    // Create bus and HAL instances
    ArduinoSPIBus bus;
@@ -122,20 +157,26 @@ This document outlines the plan to modernize the Ethernet3 library by adding mis
    
    // Create chip instances
    W5500Chip chip1(&bus, &hal, 10); // CS pin 10
-   W5500Chip chip2(&bus, &hal, 9);  // CS pin 9
+   W5100Chip chip2(&bus, &hal, 9);  // CS pin 9
    
    // Create Ethernet instances
    EthernetClass eth1(&chip1);
    EthernetClass eth2(&chip2);
    
-   // Initialize
-   eth1.begin(mac1, ip1);
-   eth2.begin(mac2, ip2);
+   // Initialize with separate DHCP instances
+   eth1.begin(mac1);  // Uses internal DhcpClass instance
+   eth2.begin(mac2);  // Uses separate DhcpClass instance
    
    // Check link status
    if (eth1.linkActive()) {
-     // Use eth1...
+     // Create client instances tied to specific Ethernet
+     EthernetClient client1(&eth1);
+     client1.connect(server_ip, 80);
    }
+   
+   // Multicast support per instance
+   EthernetUDP udp1(&eth1);
+   udp1.beginMulticast(IPAddress(239,255,0,1), 8080);
    ```
 
 ### Phase 4: Platform Support
@@ -163,6 +204,88 @@ This document outlines the plan to modernize the Ethernet3 library by adding mis
    - DMA support where available
    - Async operation modes
 
+## UDP Multicast Implementation Details
+
+### W5500 Multicast Requirements
+
+The W5500 chip supports multicast reception and transmission with proper configuration:
+
+1. **Multicast MAC Address Calculation**
+   ```cpp
+   void EthernetUDP::calculateMulticastMAC(IPAddress ip, uint8_t* mac) {
+     // Multicast MAC format: 01:00:5e:XX:XX:XX
+     // XX:XX:XX from lower 23 bits of multicast IP
+     mac[0] = 0x01;
+     mac[1] = 0x00;
+     mac[2] = 0x5e;
+     mac[3] = ip[1] & 0x7F;  // Clear upper bit for multicast range
+     mac[4] = ip[2];
+     mac[5] = ip[3];
+   }
+   ```
+
+2. **Socket Configuration for Multicast**
+   ```cpp
+   int EthernetUDP::beginMulticast(IPAddress multicast_ip, uint16_t port) {
+     if (!isMulticastGroup(multicast_ip)) return 0;
+     
+     // Configure socket for UDP multicast
+     socket(_sock, SnMR::UDP | SnMR::MULTI, port, 0);
+     
+     // Calculate and set multicast MAC
+     uint8_t multicast_mac[6];
+     calculateMulticastMAC(multicast_ip, multicast_mac);
+     
+     // Configure hardware multicast filtering
+     configureMulticastSocket(multicast_ip, port);
+     return 1;
+   }
+   ```
+
+3. **Group Management**
+   ```cpp
+   int EthernetUDP::joinMulticastGroup(IPAddress group_ip) {
+     // Note: W5500 doesn't have native IGMP support
+     // Manual router configuration or static IGMP snooping required
+     
+     // Configure socket to receive multicast packets
+     uint8_t multicast_mac[6];
+     calculateMulticastMAC(group_ip, multicast_mac);
+     
+     // Set socket to accept packets to multicast MAC
+     // Implementation depends on hardware register configuration
+     return 1;
+   }
+   ```
+
+4. **Multicast API Integration**
+   ```cpp
+   // Example usage:
+   EthernetUDP udp;
+   IPAddress multicast_group(239, 255, 0, 1);
+   
+   udp.beginMulticast(multicast_group, 8080);
+   udp.joinMulticastGroup(multicast_group);
+   
+   // Send multicast packet
+   udp.beginPacket(multicast_group, 8080);
+   udp.write("Hello multicast group!");
+   udp.endPacket();
+   
+   // Receive multicast packets
+   int packet_size = udp.parsePacket();
+   if (packet_size > 0) {
+     // Process received multicast data
+   }
+   ```
+
+### Automatic Group Management Features
+
+- **IGMP Considerations**: Document W5500's lack of native IGMP support
+- **Router Configuration**: Provide guidance for static multicast forwarding
+- **Group Lifecycle**: Automatic cleanup on socket close
+- **Error Handling**: Proper validation of multicast IP ranges (224.0.0.0/4)
+
 ## Directory Structure (Proposed)
 
 ```
@@ -171,7 +294,7 @@ src/
 ├── Ethernet3.cpp               # Main EthernetClass implementation
 ├── EthernetClient.h/cpp         # Client class (updated for multi-instance)
 ├── EthernetServer.h/cpp         # Server class (updated for multi-instance)
-├── EthernetUdp.h/cpp           # UDP class (renamed from EthernetUdp2)
+├── EthernetUdp.h/cpp           # UDP class with multicast support (enhanced from EthernetUdp2)
 ├── hal/
 │   ├── EthernetHAL.h           # HAL interface
 │   ├── ArduinoHAL.h/cpp        # Arduino HAL implementation
@@ -232,18 +355,19 @@ src/
 2. 🔄 Add `linkActive()` function using existing PHY registers
 3. 🔄 Create abstract interfaces (Bus, HAL, Chip)
 4. 🔄 Refactor W5500 to use new interfaces
+5. 🔄 Restore W5100 support from Ethernet2 heritage
 
 ### Medium Priority (Phase 2)
-5. 🔄 Implement multi-instance support
-6. 🔄 Add W5100 chip support
-7. 🔄 Create PlatformIO configuration
-8. 🔄 Add platform-specific implementations
+6. 🔄 Implement multi-instance support for all singleton classes
+7. 🔄 Complete UDP multicast implementation with automatic group management
+8. 🔄 Create PlatformIO configuration
+9. 🔄 Add platform-specific implementations
 
 ### Lower Priority (Phase 3)
-9. 🔄 Enhanced features and optimizations
-10. 🔄 Comprehensive testing
-11. 🔄 Documentation updates
-12. 🔄 Migration guides
+10. 🔄 Enhanced features and optimizations
+11. 🔄 Comprehensive testing
+12. 🔄 Documentation updates
+13. 🔄 Migration guides
 
 ## Success Criteria
 
