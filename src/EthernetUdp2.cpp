@@ -33,26 +33,31 @@
 #include "utility/w5500.h"
 #include "utility/socket.h"
 #include "Ethernet2.h"
+#include "Ethernet3.h"  // Add Ethernet3 header for multi-instance support
 #include "Udp.h"
 #include "Dns.h"
 
 /* Constructor */
-EthernetUDP::EthernetUDP() : _sock(MAX_SOCK_NUM) {}
+EthernetUDP::EthernetUDP() : _sock(MAX_SOCK_NUM), _ethernet(nullptr) {}
+
+/* Constructor with specific Ethernet3Class instance */
+EthernetUDP::EthernetUDP(Ethernet3Class* ethernet) : _sock(MAX_SOCK_NUM), _ethernet(ethernet) {}
 
 /* Start EthernetUDP socket, listening at local port PORT */
 uint8_t EthernetUDP::begin(uint16_t port) {
   if (_sock != MAX_SOCK_NUM)
     return 0;
 
-  for (int i = 0; i < MAX_SOCK_NUM; i++) {
-    uint8_t s = w5500.readSnSR(i);
+  uint8_t max_sock = getMaxSockets();
+  for (int i = 0; i < max_sock; i++) {
+    uint8_t s = getSocketState(i);
     if (s == SnSR::CLOSED || s == SnSR::FIN_WAIT) {
       _sock = i;
       break;
     }
   }
 
-  if (_sock == MAX_SOCK_NUM)
+  if (_sock == max_sock)
     return 0;
 
   _port = port;
@@ -76,7 +81,12 @@ void EthernetUDP::stop()
 
   close(_sock);
 
-  EthernetClass::_server_port[_sock] = 0;
+  if (_ethernet) {
+    _ethernet->setServerPort(_sock, 0);
+  } else {
+    // Backward compatibility - use global Ethernet
+    EthernetClass::_server_port[_sock] = 0;
+  }
   _sock = MAX_SOCK_NUM;
 }
 
@@ -87,7 +97,12 @@ int EthernetUDP::beginPacket(const char *host, uint16_t port)
   DNSClient dns;
   IPAddress remote_addr;
 
-  dns.begin(Ethernet.dnsServerIP());
+  if (_ethernet) {
+    dns.begin(_ethernet->dnsServerIP());
+  } else {
+    // Backward compatibility - use global Ethernet
+    dns.begin(Ethernet.dnsServerIP());
+  }
   ret = dns.getHostByName(host, remote_addr);
   if (ret == 1) {
     return beginPacket(remote_addr, port);
@@ -124,7 +139,8 @@ int EthernetUDP::parsePacket()
   // discard any remaining bytes in the last packet
   flush();
 
-  if (w5500.getRXReceivedSize(_sock) > 0)
+  W5500Class* w5500_inst = static_cast<W5500Class*>(getChipInstance());
+  if (w5500_inst && w5500_inst->getRXReceivedSize(_sock) > 0)
   {
     //HACK - hand-parse the UDP packet using TCP recv method
     uint8_t tmpBuf[8];
@@ -220,6 +236,50 @@ void EthernetUDP::flush()
   }
 }
 
+// Helper methods for multi-instance support
+
+uint8_t EthernetUDP::getSocketState(uint8_t sock) {
+  if (_ethernet) {
+    // For multi-instance, get socket state from specific Ethernet3Class
+    EthernetChip* chip = _ethernet->getChip();
+    if (chip && chip->getChipType() == CHIP_TYPE_W5500) {
+      W5500Chip* w5500_chip = static_cast<W5500Chip*>(chip);
+      W5500Class* w5500_inst = w5500_chip->getW5500();
+      if (w5500_inst) {
+        return w5500_inst->readSnSR(sock);
+      }
+    }
+    // TODO: Add W5100 support when needed
+    return 0xFF; // Invalid state
+  } else {
+    // Backward compatibility - use global w5500
+    return w5500.readSnSR(sock);
+  }
+}
+
+uint8_t EthernetUDP::getMaxSockets() {
+  if (_ethernet) {
+    return _ethernet->getMaxSockets();
+  } else {
+    return MAX_SOCK_NUM; // Default for backward compatibility
+  }
+}
+
+void* EthernetUDP::getChipInstance() {
+  if (_ethernet) {
+    EthernetChip* chip = _ethernet->getChip();
+    if (chip && chip->getChipType() == CHIP_TYPE_W5500) {
+      W5500Chip* w5500_chip = static_cast<W5500Chip*>(chip);
+      return w5500_chip->getW5500();
+    }
+    // TODO: Add W5100 support when needed
+    return nullptr;
+  } else {
+    // Backward compatibility - return global w5500
+    return &w5500;
+  }
+}
+
 // Multicast support implementation
 
 int EthernetUDP::beginMulticast(IPAddress multicast_ip, uint16_t port)
@@ -235,15 +295,16 @@ int EthernetUDP::beginMulticast(IPAddress multicast_ip, uint16_t port)
     
     // Find available socket
     _sock = MAX_SOCK_NUM;
-    for (uint8_t i = 0; i < MAX_SOCK_NUM; i++) {
-        uint8_t s = w5500.readSnSR(i);
+    uint8_t max_sock = getMaxSockets();
+    for (uint8_t i = 0; i < max_sock; i++) {
+        uint8_t s = getSocketState(i);
         if (s == SnSR::CLOSED || s == SnSR::FIN_WAIT) {
             _sock = i;
             break;
         }
     }
     
-    if (_sock == MAX_SOCK_NUM) {
+    if (_sock == max_sock) {
         return 0; // No sockets available
     }
     

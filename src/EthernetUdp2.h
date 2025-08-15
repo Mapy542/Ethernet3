@@ -47,6 +47,9 @@
 
 #define UDP_TX_PACKET_MAX_SIZE 24
 
+// Forward declaration for multi-instance support
+class Ethernet3Class;
+
 class EthernetUDP : public UDP {
 private:
   uint8_t _sock;  // socket ID for Wiz5100
@@ -55,9 +58,13 @@ private:
   uint16_t _remotePort; // remote port for the incoming packet whilst it's being processed
   uint16_t _offset; // offset into the packet being sent
   uint16_t _remaining; // remaining bytes of incoming packet yet to be processed
+  
+  // Multi-instance support
+  Ethernet3Class* _ethernet; // Pointer to specific Ethernet3Class instance
 
 public:
-  EthernetUDP();  // Constructor
+  EthernetUDP();  // Constructor (uses global Ethernet instance for backward compatibility)
+  EthernetUDP(Ethernet3Class* ethernet); // Constructor with specific Ethernet3Class instance
   virtual uint8_t begin(uint16_t);	// initialize, start listening on specified port. Returns 1 if successful, 0 if there are no sockets available to use
   virtual void stop();  // Finish with the UDP socket
 
@@ -146,6 +153,25 @@ private:
    * @param port UDP port
    */
   void configureMulticastSocket(IPAddress group_ip, uint16_t port);
+  
+  /**
+   * Get socket state from ethernet instance
+   * @param sock Socket number
+   * @return Socket state
+   */
+  uint8_t getSocketState(uint8_t sock);
+  
+  /**
+   * Get maximum socket number for this ethernet instance
+   * @return Maximum socket count
+   */
+  uint8_t getMaxSockets();
+  
+  /**
+   * Get W5500 instance for socket operations
+   * @return Pointer to W5500Class instance or nullptr
+   */
+  void* getChipInstance();
 };
 
 #endif
