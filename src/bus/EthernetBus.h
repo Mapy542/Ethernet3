@@ -26,6 +26,11 @@ public:
     virtual void begin(uint8_t cs_pin) = 0;
     
     /**
+     * Deinitialize the SPI bus
+     */
+    virtual void end() {}
+    
+    /**
      * Transfer a single byte
      * @param data Byte to send
      * @return Received byte
@@ -66,6 +71,30 @@ public:
      * End SPI transaction (if supported by platform)
      */
     virtual void endTransaction() {}
+    
+    /**
+     * Check if the bus supports DMA transfers
+     * @return true if DMA is supported
+     */
+    virtual bool supportsDMA() { return false; }
+    
+    /**
+     * Check if the bus supports hardware transaction management
+     * @return true if hardware transactions are supported
+     */
+    virtual bool supportsTransactions() { return false; }
+    
+    /**
+     * Get maximum transfer speed
+     * @return Maximum speed in Hz
+     */
+    virtual uint32_t getMaxSpeed() { return 8000000; }  // Default 8MHz
+    
+    /**
+     * Get platform-specific bus information
+     * @return Bus identification string
+     */
+    virtual const char* getBusInfo() { return "Generic SPI"; }
 };
 
 #endif // ETHERNET_BUS_H

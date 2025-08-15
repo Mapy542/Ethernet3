@@ -6,8 +6,23 @@
 #include <string.h>
 #include <stdlib.h>
 #include "Dhcp.h"
+#include "Ethernet3.h"  // Add Ethernet3 for multi-instance support
 #include "Arduino.h"
 #include "utility/util.h"
+
+// Constructors for multi-instance support
+DhcpClass::DhcpClass() : _ethernet(nullptr) {
+  // Will use global Ethernet instance
+}
+
+DhcpClass::DhcpClass(Ethernet3Class* ethernet_instance) : _ethernet(ethernet_instance) {
+  // Use specific Ethernet instance
+}
+
+// Helper method for multi-instance support
+Ethernet3Class* DhcpClass::getEthernetInstance() {
+  return _ethernet ? _ethernet : &Ethernet;  // Fallback to global instance
+}
 
 int DhcpClass::beginWithDHCP(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout)
 {
@@ -24,6 +39,11 @@ int DhcpClass::beginWithDHCP(uint8_t *mac, unsigned long timeout, unsigned long 
 
     memcpy((void*)_dhcpMacAddr, (void*)mac, 6);
     _dhcp_state = STATE_DHCP_START;
+    
+    // Initialize UDP socket with our Ethernet instance
+    Ethernet3Class* eth = getEthernetInstance();
+    _dhcpUdpSocket = EthernetUDP(eth);
+    
     return request_DHCP_lease();
 }
 

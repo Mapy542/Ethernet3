@@ -5,11 +5,15 @@
 #include "Client.h"
 #include "IPAddress.h"
 
+// Forward declaration for multi-instance support
+class Ethernet3Class;
+
 class EthernetClient : public Client {
 
 public:
   EthernetClient();
   EthernetClient(uint8_t sock);
+  EthernetClient(Ethernet3Class* ethernet_instance);  // Multi-instance constructor
 
   uint8_t status();
   virtual int connect(IPAddress ip, uint16_t port);
@@ -32,8 +36,13 @@ public:
   using Print::write;
 
 private:
-  static uint16_t _srcport;
+  uint16_t _srcport;           // Instance-specific source port (no longer static)
   uint8_t _sock;
+  Ethernet3Class* _ethernet;   // Associated Ethernet instance
+  
+  // Helper methods for multi-instance support
+  Ethernet3Class* getEthernetInstance();
+  uint8_t getMaxSockets();
 };
 
 #endif

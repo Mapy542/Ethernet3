@@ -5,22 +5,39 @@ extern "C" {
 }
 
 #include "Ethernet2.h"
+#include "Ethernet3.h"  // Add Ethernet3 for multi-instance support
 #include "EthernetClient.h"
 #include "EthernetServer.h"
 
 EthernetServer::EthernetServer(uint16_t port)
 {
   _port = port;
+  _ethernet = nullptr;  // Will use global instance
+}
+
+EthernetServer::EthernetServer(uint16_t port, Ethernet3Class* ethernet_instance)
+{
+  _port = port;
+  _ethernet = ethernet_instance;
+}
+
+// Helper method for multi-instance support
+Ethernet3Class* EthernetServer::getEthernetInstance() {
+  return _ethernet ? _ethernet : &Ethernet;  // Fallback to global instance
 }
 
 void EthernetServer::begin()
 {
-  for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
+  Ethernet3Class* eth = getEthernetInstance();
+  uint8_t maxSockets = eth->getMaxSockets();
+  
+  for (int sock = 0; sock < maxSockets; sock++) {
     EthernetClient client(sock);
+    client = EthernetClient(eth);  // Associate with our Ethernet instance
     if (client.status() == SnSR::CLOSED) {
-      socket(sock, SnMR::TCP, _port, 0);
-      listen(sock);
-      EthernetClass::_server_port[sock] = _port;
+      eth->socket(sock, SnMR::TCP, _port, 0);
+      eth->listen(sock);
+      eth->_server_port[sock] = _port;
       break;
     }
   }  
@@ -29,11 +46,13 @@ void EthernetServer::begin()
 void EthernetServer::accept()
 {
   int listening = 0;
+  Ethernet3Class* eth = getEthernetInstance();
+  uint8_t maxSockets = eth->getMaxSockets();
 
-  for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-    EthernetClient client(sock);
+  for (int sock = 0; sock < maxSockets; sock++) {
+    EthernetClient client(eth);  // Associate with our Ethernet instance
 
-    if (EthernetClass::_server_port[sock] == _port) {
+    if (eth->_server_port[sock] == _port) {
       if (client.status() == SnSR::LISTEN) {
         listening = 1;
       } 
@@ -51,10 +70,13 @@ void EthernetServer::accept()
 EthernetClient EthernetServer::available()
 {
   accept();
+  
+  Ethernet3Class* eth = getEthernetInstance();
+  uint8_t maxSockets = eth->getMaxSockets();
 
-  for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-    EthernetClient client(sock);
-    if (EthernetClass::_server_port[sock] == _port &&
+  for (int sock = 0; sock < maxSockets; sock++) {
+    EthernetClient client(eth);  // Associate with our Ethernet instance
+    if (eth->_server_port[sock] == _port &&
         (client.status() == SnSR::ESTABLISHED ||
          client.status() == SnSR::CLOSE_WAIT)) {
       if (client.available()) {
@@ -78,10 +100,13 @@ size_t EthernetServer::write(const uint8_t *buffer, size_t size)
   
   accept();
 
-  for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-    EthernetClient client(sock);
+  Ethernet3Class* eth = getEthernetInstance();
+  uint8_t maxSockets = eth->getMaxSockets();
 
-    if (EthernetClass::_server_port[sock] == _port &&
+  for (int sock = 0; sock < maxSockets; sock++) {
+    EthernetClient client(eth);  // Associate with our Ethernet instance
+
+    if (eth->_server_port[sock] == _port &&
       client.status() == SnSR::ESTABLISHED) {
       n += client.write(buffer, size);
     }

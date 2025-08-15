@@ -50,6 +50,36 @@ public:
      * @return Pin value (HIGH/LOW or 1/0)
      */
     virtual uint8_t digitalRead(uint8_t pin) = 0;
+    
+    /**
+     * Yield execution to other tasks/processes (optional)
+     * Default implementation does nothing for platforms without task scheduling
+     */
+    virtual void yield() {}
+    
+    /**
+     * Get platform identification string
+     * @return Platform name/version string
+     */
+    virtual const char* getPlatformName() { return "Generic"; }
+    
+    /**
+     * Check if platform supports hardware acceleration features
+     * @return true if hardware acceleration is available
+     */
+    virtual bool hasHardwareAcceleration() { return false; }
+    
+    /**
+     * Check if platform supports DMA operations
+     * @return true if DMA is available
+     */
+    virtual bool supportsDMA() { return false; }
+    
+    /**
+     * Check if platform supports real-time operations
+     * @return true if real-time features are available  
+     */
+    virtual bool supportsRealTime() { return false; }
 };
 
 #endif // ETHERNET_HAL_H

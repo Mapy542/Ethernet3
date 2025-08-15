@@ -136,6 +136,9 @@ typedef struct _RIP_MSG_FIXED
 	uint8_t  chaddr[6];
 }RIP_MSG_FIXED;
 
+// Forward declaration for multi-instance support
+class Ethernet3Class;
+
 class DhcpClass {
 
 private:
@@ -159,6 +162,7 @@ private:
   unsigned long _secTimeout;
   uint8_t _dhcp_state;
   EthernetUDP _dhcpUdpSocket;
+  Ethernet3Class* _ethernet;  // Associated Ethernet instance
   int request_DHCP_lease();
   void reset_DHCP_lease();
   void presend_DHCP();
@@ -166,7 +170,14 @@ private:
   void printByte(char *, uint8_t);
   
   uint8_t parseDHCPResponse(unsigned long responseTimeout, uint32_t& transactionId);
+  
+  // Helper method for multi-instance support
+  Ethernet3Class* getEthernetInstance();
+  
 public:
+  DhcpClass();                                // Default constructor (uses global Ethernet)
+  DhcpClass(Ethernet3Class* ethernet_instance);  // Multi-instance constructor
+  
   IPAddress getLocalIp();
   IPAddress getSubnetMask();
   IPAddress getGatewayIp();
