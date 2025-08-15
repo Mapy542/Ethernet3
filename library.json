@@ -1,0 +1,65 @@
+{
+  "name": "Ethernet3",
+  "version": "1.6.0",
+  "description": "Modernized Ethernet library with W5100/W5500 support, multi-instance architecture, and platform optimizations",
+  "keywords": [
+    "ethernet",
+    "w5100", 
+    "w5500",
+    "networking",
+    "multicast",
+    "multi-instance",
+    "spi",
+    "embedded",
+    "arduino",
+    "esp32",
+    "stm32"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mapy542/Ethernet3.git"
+  },
+  "authors": [
+    {
+      "name": "Ethernet3 Contributors",
+      "maintainer": true
+    }
+  ],
+  "license": "LGPL-2.1",
+  "homepage": "https://github.com/Mapy542/Ethernet3",
+  "documentation": "https://github.com/Mapy542/Ethernet3/tree/main/docs",
+  "frameworks": ["arduino"],
+  "platforms": ["atmelavr", "espressif32", "espressif8266", "ststm32", "raspberrypi", "teensy"],
+  "dependencies": [],
+  "export": {
+    "exclude": [
+      ".git*",
+      ".vscode",
+      "test",
+      "*.tmp",
+      "*.bak"
+    ]
+  },
+  "examples": [
+    {
+      "name": "Basic Web Client",
+      "base": "examples/WebClient"
+    },
+    {
+      "name": "Multi-Instance Architecture",
+      "base": "examples/MultiInstanceDemo"
+    },
+    {
+      "name": "UDP Multicast and Link Monitoring",
+      "base": "examples/Ethernet3ModernizationDemo"
+    },
+    {
+      "name": "Client-Server Multi-Instance",
+      "base": "examples/MultiInstanceClientServerDemo"
+    },
+    {
+      "name": "Platform Optimizations",
+      "base": "examples/PlatformOptimizationDemo"
+    }
+  ]
+}
