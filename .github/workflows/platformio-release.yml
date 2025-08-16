@@ -11,7 +11,7 @@ on:
                 default: '1.6.0'
 
 jobs:
-    test:
+    validate:
         runs-on: ubuntu-latest
         strategy:
             matrix:
@@ -37,7 +37,7 @@ jobs:
 
             - name: Build Example
               run: |
-                  pio ci examples/${{ matrix.example }} --board=${{ matrix.platform }}
+                  pio ci examples/${{ matrix.example }} --board=${{ matrix.platform }} --lib=./
 
     release:
         needs: validate
