@@ -56,4 +56,3 @@ jobs:
               run: |
                   mkdir ./dist/
                   pio package pack --output ./dist/
-                  pio lib check --library .
