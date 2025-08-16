@@ -15,22 +15,16 @@
 #include <Ethernet3.h>
 #include <EthernetUdp2.h>
 
-// Platform-specific HAL and Bus selection
+// Platform-specific platform selection
 #ifdef ESP32
-#include "hal/ESP32HAL.h"
-#include "bus/ESP32SPIBus.h"
-ESP32HAL hal;
-ESP32SPIBus bus;
+#include "hal/ESP32Platform.h"
+ESP32Platform platform;
 #elif defined(STM32F1) || defined(STM32F4)
-#include "hal/STM32HAL.h"
-#include "bus/STM32SPIBus.h"
-STM32HAL hal;
-STM32SPIBus bus;
+#include "hal/STM32Platform.h"
+STM32Platform platform;
 #else
-#include "hal/ArduinoHAL.h"
-#include "bus/ArduinoSPIBus.h"
-ArduinoHAL hal;
-ArduinoSPIBus bus;
+#include "hal/ArduinoPlatform.h"
+ArduinoPlatform platform;
 #endif
 
 // Network configuration
@@ -39,9 +33,9 @@ byte mac2[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEC };
 IPAddress ip1(192, 168, 1, 177);
 IPAddress ip2(192, 168, 1, 178);
 
-// Create multiple Ethernet instances
-Ethernet3Class eth1(CHIP_TYPE_W5500, 10);  // W5500 on CS pin 10  
-Ethernet3Class eth2(CHIP_TYPE_W5100, 9);   // W5100 on CS pin 9
+// Create multiple Ethernet instances with unified platform
+Ethernet3Class eth1(CHIP_TYPE_W5500, 10, &platform);  // W5500 on CS pin 10  
+Ethernet3Class eth2(CHIP_TYPE_W5100, 9, &platform);   // W5100 on CS pin 9
 
 // Create multi-instance clients and servers
 EthernetClient client1(&eth1);      // Client using eth1

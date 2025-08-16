@@ -18,8 +18,7 @@
 #include "chips/EthernetChip.h"
 #include "chips/W5500Chip.h"
 #include "chips/W5100Chip.h"
-#include "hal/ArduinoHAL.h"
-#include "bus/ArduinoSPIBus.h"
+#include "hal/ArduinoPlatform.h"
 #include "IPAddress.h"
 
 // Forward declarations  
@@ -40,8 +39,7 @@ private:
     
     // Multi-instance support
     EthernetChip* _chip;
-    EthernetBus* _bus;
-    EthernetHAL* _hal;
+    EthernetPlatform* _platform;
     
     // Per-instance state (replaces static arrays)
     uint8_t* _state;
@@ -74,11 +72,10 @@ public:
      * @param chip_type Type of chip (CHIP_TYPE_W5100 or CHIP_TYPE_W5500)
      * @param cs_pin Chip select pin
      * @param bus_interface Optional bus interface (uses Arduino SPI if null)
-     * @param hal_interface Optional HAL interface (uses Arduino HAL if null)
+     * @param platform_interface Optional platform interface (uses Arduino platform if null)
      */
     Ethernet3Class(uint8_t chip_type, uint8_t cs_pin, 
-                   EthernetBus* bus_interface = nullptr, 
-                   EthernetHAL* hal_interface = nullptr);
+                   EthernetPlatform* platform_interface = nullptr);
     
     /**
      * Destructor
