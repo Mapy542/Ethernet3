@@ -232,7 +232,12 @@ uint8_t EthernetUDP::getSocketState(uint8_t sock) {
         return 0xFF;  // Invalid state
     } else {
         // Backward compatibility - use global w5500
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
         return w5500.readSnSR(sock);
+#else
+        // Error: No chip instance available
+        return 0;
+#endif
     }
 }
 
@@ -255,7 +260,12 @@ void* EthernetUDP::getChipInstance() {
         return nullptr;
     } else {
         // Backward compatibility - return global w5500
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
         return &w5500;
+#else
+        // Error: No chip instance available
+        return nullptr;
+#endif
     }
 }
 

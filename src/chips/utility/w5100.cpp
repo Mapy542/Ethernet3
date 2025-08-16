@@ -8,8 +8,10 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-// Global instance
+// W5100 controller instance - conditional singleton for backward compatibility
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
 W5100Class w5100;
+#endif
 
 // Static member initialization
 uint8_t W5100Class::chip_cs_pin = 10;
