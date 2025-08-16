@@ -11,7 +11,7 @@ jobs:
                 example: [WebClient, MultiInstanceDemo, Ethernet3ModernizationDemo]
                 exclude:
                     # Exclude resource-intensive examples on smaller platforms
-                    - platform: arduino_uno
+                    - platform: uno
                       example: MultiInstanceDemo
 
         steps:
