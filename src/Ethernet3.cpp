@@ -6,13 +6,13 @@
 #include "EthernetClient.h"
 #include "EthernetServer.h"
 #include "Dhcp.h"
+#include "hal/ArduinoPlatform.h"
 
 // Conditional backward compatibility - only create global instances when needed
 #ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
-    // Create global instances for backward compatibility
-    static ArduinoSPIBus global_bus;
-    static ArduinoHAL global_hal; 
-    static W5500Chip global_w5500_chip(&w5500, &global_bus, &global_hal, 10);
+    // Create global instances for backward compatibility using unified platform architecture
+    static ArduinoPlatform global_platform;
+    static W5500Chip global_w5500_chip(&w5500, &global_platform, 10);
     
     // Global Ethernet instance for backward compatibility
     Ethernet3Class Ethernet(&global_w5500_chip, false);
@@ -23,7 +23,7 @@
 #ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
 // Default constructor for backward compatibility
 Ethernet3Class::Ethernet3Class() 
-    : _dhcp(nullptr), _chip(&global_w5500_chip), _bus(&global_bus), _hal(&global_hal),
+    : _dhcp(nullptr), _chip(&global_w5500_chip), _platform(&global_platform),
       _state(nullptr), _server_port(nullptr), _max_sockets(MAX_SOCK_NUM), 
       _cs_pin(10), _owns_chip(false) {
     initializeInstance();
@@ -32,14 +32,13 @@ Ethernet3Class::Ethernet3Class()
 
 // Constructor with specific chip instance
 Ethernet3Class::Ethernet3Class(EthernetChip* chip, bool owns_chip)
-    : _dhcp(nullptr), _chip(chip), _bus(nullptr), _hal(nullptr),
+    : _dhcp(nullptr), _chip(chip), _platform(nullptr),
       _state(nullptr), _server_port(nullptr), _owns_chip(owns_chip) {
     
     if (_chip) {
         _max_sockets = MAX_SOCK_NUM; // Default, may be overridden
         _cs_pin = _chip->getCSPin();
-        _bus = _chip->getBus();
-        _hal = _chip->getHAL();
+        _platform = _chip->getPlatform();
     } else {
         _max_sockets = MAX_SOCK_NUM;
         _cs_pin = 10;

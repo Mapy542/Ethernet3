@@ -10,7 +10,7 @@
 
 #include <SPI.h>
 #include <Ethernet3.h>
-#include <EthernetUdp2.h>
+#include <EthernetUdp.h>
 
 // MAC address and IP configuration
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };

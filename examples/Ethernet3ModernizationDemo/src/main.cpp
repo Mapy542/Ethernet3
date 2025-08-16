@@ -12,8 +12,8 @@
  */
 
 #include <SPI.h>
-#include <Ethernet2.h>
-#include <EthernetUdp2.h>
+#include <Ethernet3.h>
+#include <EthernetUdp.h>
 
 // Enter a MAC address and IP address for your controller below.
 byte mac[] = {

@@ -13,7 +13,7 @@
 
 #include <SPI.h>
 #include <Ethernet3.h>
-#include <EthernetUdp2.h>
+#include <EthernetUdp.h>
 
 // Platform-specific platform selection
 #ifdef ESP32
