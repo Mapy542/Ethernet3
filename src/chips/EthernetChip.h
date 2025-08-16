@@ -9,8 +9,7 @@
 #define ETHERNET_CHIP_H
 
 #include <stdint.h>
-#include "../bus/EthernetBus.h"
-#include "../hal/EthernetHAL.h"
+#include "../hal/EthernetPlatform.h"
 
 // Chip type constants
 #define CHIP_TYPE_W5100 0x51
@@ -22,19 +21,17 @@
  */
 class EthernetChip {
 protected:
-    EthernetBus* bus;     ///< SPI bus interface
-    EthernetHAL* hal;     ///< Hardware abstraction layer
-    uint8_t cs_pin;       ///< Chip select pin
+    EthernetPlatform* platform;  ///< Unified platform interface
+    uint8_t cs_pin;              ///< Chip select pin
 
 public:
     /**
      * Constructor
-     * @param bus_interface Pointer to SPI bus implementation
-     * @param hal_interface Pointer to HAL implementation  
+     * @param platform_interface Pointer to unified platform implementation
      * @param chip_select_pin Chip select pin number
      */
-    EthernetChip(EthernetBus* bus_interface, EthernetHAL* hal_interface, uint8_t chip_select_pin)
-        : bus(bus_interface), hal(hal_interface), cs_pin(chip_select_pin) {}
+    EthernetChip(EthernetPlatform* platform_interface, uint8_t chip_select_pin)
+        : platform(platform_interface), cs_pin(chip_select_pin) {}
     
     virtual ~EthernetChip() {}
     

@@ -14,28 +14,22 @@
 
 // Platform-specific includes and optimizations
 #ifdef ESP32
-#include "hal/ESP32HAL.h"
-#include "bus/ESP32SPIBus.h"
-ESP32HAL hal;
-ESP32SPIBus bus(NULL, 16000000);  // 16MHz for ESP32
+#include "hal/ESP32Platform.h"
+ESP32Platform platform(NULL, 16000000);  // 16MHz for ESP32
 #elif defined(STM32F1) || defined(STM32F4)
-#include "hal/STM32HAL.h"
-#include "bus/STM32SPIBus.h"
-STM32HAL hal;
-STM32SPIBus bus(NULL, 12000000);  // 12MHz for STM32
+#include "hal/STM32Platform.h"
+STM32Platform platform(NULL, 12000000);  // 12MHz for STM32
 #else
-#include "hal/ArduinoHAL.h"
-#include "bus/ArduinoSPIBus.h"
-ArduinoHAL hal;
-ArduinoSPIBus bus;  // Default speed for Arduino
+#include "hal/ArduinoPlatform.h"
+ArduinoPlatform platform;  // Default speed for Arduino
 #endif
 
 // Network configuration
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(192, 168, 1, 177);
 
-// Create optimized Ethernet instance
-Ethernet3Class eth(CHIP_TYPE_W5500, 10);
+// Create optimized Ethernet instance with unified platform
+Ethernet3Class eth(CHIP_TYPE_W5500, 10, &platform);
 EthernetUDP udp(&eth);
 
 // Performance measurement variables
@@ -102,7 +96,7 @@ void loop() {
   }
   
   // Platform-specific yielding for optimal performance
-  hal.yield();
+  platform.yield();
   
   // Minimal delay for high-performance operation
   #ifdef ESP32
@@ -119,24 +113,24 @@ void loop() {
 
 void displayPlatformInfo() {
   Serial.print("Platform: ");
-  Serial.println(hal.getPlatformName());
+  Serial.println(platform.getPlatformName());
   Serial.print("Hardware Acceleration: ");
-  Serial.println(hal.hasHardwareAcceleration() ? "Available" : "Not Available");
+  Serial.println(platform.hasHardwareAcceleration() ? "Available" : "Not Available");
   Serial.print("DMA Support: ");
-  Serial.println(hal.supportsDMA() ? "Available" : "Not Available");
+  Serial.println(platform.supportsDMA() ? "Available" : "Not Available");
   Serial.print("Real-time Support: ");
-  Serial.println(hal.supportsRealTime() ? "Available" : "Not Available");
+  Serial.println(platform.supportsRealTime() ? "Available" : "Not Available");
   
-  // Bus information
+  // Platform SPI information
   Serial.print("SPI Bus: ");
-  Serial.println(bus.getBusInfo());
+  Serial.println(platform.getPlatformInfo());
   Serial.print("Max SPI Speed: ");
-  Serial.print(bus.getMaxSpeed() / 1000000);
+  Serial.print(platform.getMaxSPISpeed() / 1000000);
   Serial.println(" MHz");
-  Serial.print("DMA Transfers: ");
-  Serial.println(bus.supportsDMA() ? "Supported" : "Not Supported");
+  Serial.print("SPI DMA Transfers: ");
+  Serial.println(platform.supportsDMA() ? "Supported" : "Not Supported");
   Serial.print("Hardware Transactions: ");
-  Serial.println(bus.supportsTransactions() ? "Supported" : "Not Supported");
+  Serial.println(platform.supportsTransactions() ? "Supported" : "Not Supported");
 }
 
 void enablePlatformOptimizations() {

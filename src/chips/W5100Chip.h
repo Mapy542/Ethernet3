@@ -20,22 +20,20 @@ private:
 public:
     /**
      * Constructor
-     * @param bus_interface Pointer to SPI bus implementation
-     * @param hal_interface Pointer to HAL implementation  
+     * @param platform_interface Pointer to unified platform implementation
      * @param chip_select_pin Chip select pin number
      */
-    W5100Chip(EthernetBus* bus_interface, EthernetHAL* hal_interface, uint8_t chip_select_pin)
-        : EthernetChip(bus_interface, hal_interface, chip_select_pin), w5100_instance(nullptr) {}
+    W5100Chip(EthernetPlatform* platform_interface, uint8_t chip_select_pin)
+        : EthernetChip(platform_interface, chip_select_pin), w5100_instance(nullptr) {}
     
     /**
      * Constructor with existing W5100Class instance (for backward compatibility)
      * @param w5100_inst Pointer to existing W5100Class instance
-     * @param bus_interface Pointer to SPI bus implementation
-     * @param hal_interface Pointer to HAL implementation  
+     * @param platform_interface Pointer to unified platform implementation
      * @param chip_select_pin Chip select pin number
      */
-    W5100Chip(W5100Class* w5100_inst, EthernetBus* bus_interface, EthernetHAL* hal_interface, uint8_t chip_select_pin)
-        : EthernetChip(bus_interface, hal_interface, chip_select_pin), w5100_instance(w5100_inst) {}
+    W5100Chip(W5100Class* w5100_inst, EthernetPlatform* platform_interface, uint8_t chip_select_pin)
+        : EthernetChip(platform_interface, chip_select_pin), w5100_instance(w5100_inst) {}
     
     bool init() override {
         if (w5100_instance) {

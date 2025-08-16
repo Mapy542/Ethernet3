@@ -50,30 +50,23 @@ Ethernet3Class::Ethernet3Class(EthernetChip* chip, bool owns_chip)
 
 // Constructor for creating new chip instances
 Ethernet3Class::Ethernet3Class(uint8_t chip_type, uint8_t cs_pin, 
-                               EthernetBus* bus_interface, 
-                               EthernetHAL* hal_interface)
+                               EthernetPlatform* platform_interface)
     : _dhcp(nullptr), _chip(nullptr), _state(nullptr), _server_port(nullptr),
       _cs_pin(cs_pin), _owns_chip(true) {
     
-    // Create bus and HAL if not provided
-    if (!bus_interface) {
-        _bus = new ArduinoSPIBus();
+    // Create platform if not provided
+    if (!platform_interface) {
+        _platform = new ArduinoPlatform();
     } else {
-        _bus = bus_interface;
-    }
-    
-    if (!hal_interface) {
-        _hal = new ArduinoHAL();
-    } else {
-        _hal = hal_interface;
+        _platform = platform_interface;
     }
     
     // Create appropriate chip instance
     if (chip_type == CHIP_TYPE_W5100) {
-        _chip = new W5100Chip(&w5100, _bus, _hal, cs_pin);
+        _chip = new W5100Chip(&w5100, _platform, cs_pin);
         _max_sockets = W5100_MAX_SOCK_NUM;
     } else { // Default to W5500
-        _chip = new W5500Chip(&w5500, _bus, _hal, cs_pin);
+        _chip = new W5500Chip(&w5500, _platform, cs_pin);
         _max_sockets = MAX_SOCK_NUM;
     }
     
@@ -121,8 +114,10 @@ void Ethernet3Class::cleanup() {
             delete _chip;
             _chip = nullptr;
         }
-        // Note: We don't delete _bus and _hal here as they might be shared
-        // In a more sophisticated implementation, reference counting would be used
+        if (_platform) {
+            delete _platform;
+            _platform = nullptr;
+        }
     }
 }
 
