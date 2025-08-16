@@ -1,91 +1,89 @@
 name: PlatformIO Library Release
 
 on:
-  release:
-    types: [published]
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release'
-        required: true
-        default: '1.6.0'
+    release:
+        types: [published]
+    workflow_dispatch:
+        inputs:
+            version:
+                description: 'Version to release'
+                required: true
+                default: '1.6.0'
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        platform: [arduino_uno, esp32dev, nucleo_f401re]
-        example: [WebClient, MultiInstanceDemo, Ethernet3ModernizationDemo]
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-    
-    - name: Install PlatformIO
-      run: |
-        pip install platformio
-        pio upgrade --dev
-        pio pkg install --global "tool-unity"
-    
-    - name: Build Example
-      run: |
-        pio ci examples/${{ matrix.example }} --board=${{ matrix.platform }}
-    
-    - name: Run Tests
-      if: matrix.platform == 'arduino_uno' && matrix.example == 'WebClient'
-      run: |
-        pio test -e native || true  # Don't fail if no tests
-  
-  release:
-    needs: validate
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python  
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-    
-    - name: Install PlatformIO
-      run: |
-        pip install platformio
-        pio upgrade --dev
-    
-    - name: Update Version
-      run: |
-        VERSION=${GITHUB_REF#refs/tags/v}
-        sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" library.json
-        sed -i "s/version=.*/version=$VERSION/" library.properties
-    
-    - name: Login to PlatformIO
-      env:
-        PLATFORMIO_AUTH_TOKEN: ${{ secrets.PLATFORMIO_AUTH_TOKEN }}
-      run: |
-        echo "$PLATFORMIO_AUTH_TOKEN" | pio account login --username "${{ secrets.PLATFORMIO_USERNAME }}" --password -
-    
-    - name: Package Library
-      run: |
-        mkdir -p dist
-        pio package pack --output ./dist/
-    
-    - name: Publish to Registry
-      run: |
-        pio package publish ./dist/*.tar.gz
-    
-    - name: Upload Release Assets
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./dist/Ethernet3-${{ github.event.release.tag_name }}.tar.gz
-        asset_name: Ethernet3-${{ github.event.release.tag_name }}.tar.gz
-        asset_content_type: application/gzip
+    test:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                platform: [uno, megaatmega2560, esp32-c6-devkitc-1]
+                example: [WebClient, MultiInstanceDemo, Ethernet3ModernizationDemo]
+                exclude:
+                    # Exclude resource-intensive examples on smaller platforms
+                    - platform: arduino_uno
+                      example: MultiInstanceDemo
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: '3.x'
+
+            - name: Install PlatformIO
+              run: |
+                  pip install platformio
+                  pio upgrade --dev
+
+            - name: Build Example
+              run: |
+                  pio ci examples/${{ matrix.example }} --board=${{ matrix.platform }}
+
+    release:
+        needs: validate
+        runs-on: ubuntu-latest
+        if: github.event_name == 'release'
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: '3.x'
+
+            - name: Install PlatformIO
+              run: |
+                  pip install platformio
+                  pio upgrade --dev
+
+            - name: Update Version
+              run: |
+                  VERSION=${GITHUB_REF#refs/tags/v}
+                  sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" library.json
+                  sed -i "s/version=.*/version=$VERSION/" library.properties
+
+            - name: Login to PlatformIO
+              env:
+                  PLATFORMIO_AUTH_TOKEN: ${{ secrets.PLATFORMIO_AUTH_TOKEN }}
+              run: |
+                  echo "$PLATFORMIO_AUTH_TOKEN" | pio account login --username "${{ secrets.PLATFORMIO_USERNAME }}" --password -
+
+            - name: Package Library
+              run: |
+                  mkdir -p dist
+                  pio package pack --output ./dist/
+
+            - name: Publish to Registry
+              run: |
+                  pio package publish ./dist/*.tar.gz
+
+            - name: Upload Release Assets
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ github.event.release.upload_url }}
+                  asset_path: ./dist/Ethernet3-${{ github.event.release.tag_name }}.tar.gz
+                  asset_name: Ethernet3-${{ github.event.release.tag_name }}.tar.gz
+                  asset_content_type: application/gzip

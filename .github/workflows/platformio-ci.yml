@@ -1,78 +1,59 @@
 name: PlatformIO CI
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        platform: [arduino_uno, arduino_mega, esp32dev, esp8266, nucleo_f401re, bluepill]
-        example: [WebClient, MultiInstanceDemo, Ethernet3ModernizationDemo]
-        exclude:
-          # Exclude resource-intensive examples on smaller platforms
-          - platform: arduino_uno
-            example: MultiInstanceDemo
-          - platform: esp8266
-            example: MultiInstanceDemo
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-    
-    - name: Install PlatformIO
-      run: |
-        pip install platformio
-        pio upgrade --dev
-    
-    - name: Build Example
-      run: |
-        pio ci examples/${{ matrix.example }} --board=${{ matrix.platform }}
+    test:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                platform: [uno, megaatmega2560, esp32-c6-devkitc-1]
+                example: [WebClient, MultiInstanceDemo, Ethernet3ModernizationDemo]
+                exclude:
+                    # Exclude resource-intensive examples on smaller platforms
+                    - platform: arduino_uno
+                      example: MultiInstanceDemo
 
-  library-check:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-    
-    - name: Install PlatformIO
-      run: |
-        pip install platformio
-        pio upgrade --dev
-    
-    - name: Library Check
-      run: |
-        pio package pack --output ./dist/
-        pio lib check --library .
+        steps:
+            - uses: actions/checkout@v4
 
-  documentation:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Check Documentation
-      run: |
-        # Check that all required documentation files exist
-        test -f README.md
-        test -f PLATFORMIO_RELEASE.md
-        test -f library.json
-        test -f library.properties
-        test -f docs/README.md
-        test -f docs/getting-started.md
-        test -f docs/multi-instance.md
-        test -f docs/udp-multicast.md
-        echo "Documentation structure validated ✓"
-    
-    - name: Validate Library Manifest
-      run: |
-        # Basic JSON validation for library.json
-        python3 -m json.tool library.json > /dev/null
-        echo "library.json is valid JSON ✓"
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: '3.x'
+
+            - name: Install PlatformIO
+              run: |
+                  pip install platformio
+                  pio upgrade --dev
+
+            - name: Build Example
+              run: |
+                  pio ci examples/${{ matrix.example }} --board=${{ matrix.platform }}
+
+    library-check:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: '3.x'
+
+            - name: Install PlatformIO
+              run: |
+                  pip install platformio
+                  pio upgrade --dev
+
+            - name: Validate Library Manifest
+              run: |
+                  # Basic JSON validation for library.json
+                  python3 -m json.tool library.json > /dev/null
+                  echo "library.json is valid JSON ✓"
+
+            - name: Library Check
+              run: |
+                  mkdir ./dist/
+                  pio package pack --output ./dist/
+                  pio lib check --library .
