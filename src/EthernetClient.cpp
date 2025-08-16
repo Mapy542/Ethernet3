@@ -14,7 +14,7 @@ extern "C" {
 
 // Backward compatibility includes
 #ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
-#include "Ethernet2.h"
+// Global Ethernet instance will be available via Ethernet3.h
 #endif
 
 // Constructors

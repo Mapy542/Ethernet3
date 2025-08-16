@@ -38,7 +38,7 @@
 
 // Backward compatibility includes
 #ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
-#include "Ethernet2.h"
+// Global Ethernet instance will be available via Ethernet3.h
 #endif
 
 /* Constructors */
@@ -90,8 +90,10 @@ void EthernetUDP::stop()
   if (_ethernet) {
     _ethernet->setServerPort(_sock, 0);
   } else {
-    // Backward compatibility - use global Ethernet
-    EthernetClass::_server_port[_sock] = 0;
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+    // Backward compatibility - use global Ethernet instance
+    Ethernet.setServerPort(_sock, 0);
+#endif
   }
   _sock = MAX_SOCK_NUM;
 }

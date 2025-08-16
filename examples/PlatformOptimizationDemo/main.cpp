@@ -10,7 +10,7 @@
 
 #include <SPI.h>
 #include <Ethernet3.h>
-#include <EthernetUdp2.h>
+#include <EthernetUdp.h>
 
 // Platform-specific includes and optimizations
 #ifdef ESP32
