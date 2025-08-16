@@ -29,89 +29,71 @@
     "homepage": "https://github.com/Mapy542/Ethernet3",
     "documentation": "https://github.com/Mapy542/Ethernet3/tree/main/docs",
     "frameworks": ["arduino"],
-    "platforms": ["atmelavr", "espressif32", "espressif8266", "ststm32", "raspberrypi", "teensy"],
+    "platforms": ["atmelavr", "espressif32", "espressif8266", "stm32", "raspberrypi", "teensy"],
     "dependencies": [],
     "export": {
         "exclude": [".git*", ".vscode", "test", "*.tmp", "*.bak"]
     },
     "examples": [
         {
-            "name": "Advanced Chat Server",
-            "base": "examples/AdvancedChatServer",
-            "files": ["src/main.cpp", "platformio.ini"]
-        },
-        {
             "name": "Backward Compatibility Demo",
             "base": "examples/BackwardCompatibilityDemo",
-            "files": ["src/main.cpp", "platformio.ini"]
+            "files": ["platformio.ini", "src/main.cpp"]
         },
-        {
-            "name": "Barometric Pressure Web Server",
-            "base": "examples/BarometricPressureWebServer",
-            "files": ["src/main.cpp", "platformio.ini"]
-        },
-        { "name": "Chat Server", "base": "examples/ChatServer", "files": ["src/main.cpp", "platformio.ini"] },
         {
             "name": "DHCP Address Printer",
             "base": "examples/DhcpAddressPrinter",
-            "files": ["src/main.cpp", "platformio.ini"]
-        },
-        {
-            "name": "DHCP Chat Server",
-            "base": "examples/DhcpChatServer",
-            "files": ["src/main.cpp", "platformio.ini"]
+            "files": ["platformio.ini", "src/main.cpp"]
         },
         {
             "name": "Ethernet3 Comprehensive Demo",
             "base": "examples/Ethernet3ComprehensiveDemo",
-            "files": ["src/main.cpp", "platformio.ini"]
+            "files": ["platformio.ini", "src/main.cpp"]
         },
         {
             "name": "Ethernet3 Modernization Demo",
             "base": "examples/Ethernet3ModernizationDemo",
-            "files": ["src/main.cpp", "platformio.ini"]
+            "files": ["platformio.ini", "src/main.cpp"]
         },
         {
             "name": "Multi-Instance Client Server Demo",
             "base": "examples/MultiInstanceClientServerDemo",
-            "files": ["src/main.cpp", "platformio.ini"]
+            "files": ["platformio.ini", "src/main.cpp"]
         },
         {
             "name": "Multi-Instance Demo",
             "base": "examples/MultiInstanceDemo",
-            "files": ["src/main.cpp", "platformio.ini"]
-        },
-        {
-            "name": "Platform Optimization Demo",
-            "base": "examples/PlatformOptimizationDemo",
-            "files": ["src/main.cpp", "platformio.ini"]
+            "files": ["platformio.ini", "src/main.cpp"]
         },
         {
             "name": "Telnet Client",
             "base": "examples/TelnetClient",
-            "files": ["src/main.cpp", "platformio.ini"]
+            "files": ["platformio.ini", "src/main.cpp"]
         },
         {
             "name": "UDP Multi-Instance Demo",
             "base": "examples/UDPMultiInstanceDemo",
-            "files": ["src/main.cpp", "platformio.ini"]
+            "files": ["platformio.ini", "src/main.cpp"]
         },
         {
             "name": "UDP NTP Client",
             "base": "examples/UdpNtpClient",
-            "files": ["src/main.cpp", "platformio.ini"]
+            "files": ["platformio.ini", "src/main.cpp"]
         },
         {
             "name": "UDP Send Receive String",
             "base": "examples/UDPSendReceiveString",
-            "files": ["src/main.cpp", "platformio.ini"]
+            "files": ["platformio.ini", "src/main.cpp"]
         },
-        { "name": "Web Client", "base": "examples/WebClient", "files": ["src/main.cpp", "platformio.ini"] },
         {
-            "name": "Web Client Repeating",
-            "base": "examples/WebClientRepeating",
-            "files": ["src/main.cpp", "platformio.ini"]
+            "name": "Web Client",
+            "base": "examples/WebClient",
+            "files": ["platformio.ini", "src/main.cpp"]
         },
-        { "name": "Web Server", "base": "examples/WebServer", "files": ["src/main.cpp", "platformio.ini"] }
+        {
+            "name": "Web Server",
+            "base": "examples/WebServer",
+            "files": ["platformio.ini", "src/main.cpp"]
+        }
     ]
 }
