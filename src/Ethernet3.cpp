@@ -74,10 +74,18 @@ Ethernet3Class::Ethernet3Class(uint8_t chip_type, uint8_t cs_pin,
 
     // Create appropriate chip instance
     if (chip_type == CHIP_TYPE_W5100) {
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
         _chip = new W5100Chip(&w5100, _platform, cs_pin);
+#else
+        _chip = new W5100Chip(nullptr, _platform, cs_pin);
+#endif
         _max_sockets = W5100_MAX_SOCK_NUM;
     } else {  // Default to W5500
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
         _chip = new W5500Chip(&w5500, _platform, cs_pin);
+#else
+        _chip = new W5500Chip(nullptr, _platform, cs_pin);
+#endif
         _max_sockets = MAX_SOCK_NUM;
     }
 

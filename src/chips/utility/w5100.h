@@ -119,7 +119,9 @@ class W5100Class {
     static uint16_t getBufferMask(SOCKET s);
 };
 
-// Global instance for backward compatibility
+// Global W5100 instance for backward compatibility
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
 extern W5100Class w5100;
+#endif
 
 #endif  // W5100_H

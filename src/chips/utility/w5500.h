@@ -20,6 +20,14 @@
 
 extern uint8_t SPI_CS;
 
+// Forward declaration of W5500Class
+class W5500Class;
+
+// Conditional singleton for backward compatibility
+#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
+extern W5500Class w5500;
+#endif
+
 typedef uint8_t SOCKET;
 /*
 class MR {
