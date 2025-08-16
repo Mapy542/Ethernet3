@@ -1,65 +1,117 @@
 {
-  "name": "Ethernet3",
-  "version": "1.6.0",
-  "description": "Modernized Ethernet library with W5100/W5500 support, multi-instance architecture, and platform optimizations",
-  "keywords": [
-    "ethernet",
-    "w5100", 
-    "w5500",
-    "networking",
-    "multicast",
-    "multi-instance",
-    "spi",
-    "embedded",
-    "arduino",
-    "esp32",
-    "stm32"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Mapy542/Ethernet3.git"
-  },
-  "authors": [
-    {
-      "name": "Ethernet3 Contributors",
-      "maintainer": true
-    }
-  ],
-  "license": "LGPL-2.1",
-  "homepage": "https://github.com/Mapy542/Ethernet3",
-  "documentation": "https://github.com/Mapy542/Ethernet3/tree/main/docs",
-  "frameworks": ["arduino"],
-  "platforms": ["atmelavr", "espressif32", "espressif8266", "ststm32", "raspberrypi", "teensy"],
-  "dependencies": [],
-  "export": {
-    "exclude": [
-      ".git*",
-      ".vscode",
-      "test",
-      "*.tmp",
-      "*.bak"
+    "name": "Ethernet3",
+    "version": "1.6.0",
+    "description": "Modernized Ethernet library with W5100/W5500 support, multi-instance architecture, and platform optimizations",
+    "keywords": [
+        "ethernet",
+        "w5100",
+        "w5500",
+        "networking",
+        "multicast",
+        "multi-instance",
+        "spi",
+        "embedded",
+        "arduino",
+        "esp32",
+        "stm32"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Mapy542/Ethernet3.git"
+    },
+    "authors": [
+        {
+            "name": "Ethernet3 Contributors",
+            "maintainer": true
+        }
+    ],
+    "license": "LGPL-2.1",
+    "homepage": "https://github.com/Mapy542/Ethernet3",
+    "documentation": "https://github.com/Mapy542/Ethernet3/tree/main/docs",
+    "frameworks": ["arduino"],
+    "platforms": ["atmelavr", "espressif32", "espressif8266", "ststm32", "raspberrypi", "teensy"],
+    "dependencies": [],
+    "export": {
+        "exclude": [".git*", ".vscode", "test", "*.tmp", "*.bak"]
+    },
+    "examples": [
+        {
+            "name": "Advanced Chat Server",
+            "base": "examples/AdvancedChatServer",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "Backward Compatibility Demo",
+            "base": "examples/BackwardCompatibilityDemo",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "Barometric Pressure Web Server",
+            "base": "examples/BarometricPressureWebServer",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        { "name": "Chat Server", "base": "examples/ChatServer", "files": ["src/main.cpp", "platformio.ini"] },
+        {
+            "name": "DHCP Address Printer",
+            "base": "examples/DhcpAddressPrinter",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "DHCP Chat Server",
+            "base": "examples/DhcpChatServer",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "Ethernet3 Comprehensive Demo",
+            "base": "examples/Ethernet3ComprehensiveDemo",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "Ethernet3 Modernization Demo",
+            "base": "examples/Ethernet3ModernizationDemo",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "Multi-Instance Client Server Demo",
+            "base": "examples/MultiInstanceClientServerDemo",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "Multi-Instance Demo",
+            "base": "examples/MultiInstanceDemo",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "Platform Optimization Demo",
+            "base": "examples/PlatformOptimizationDemo",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "Telnet Client",
+            "base": "examples/TelnetClient",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "UDP Multi-Instance Demo",
+            "base": "examples/UDPMultiInstanceDemo",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "UDP NTP Client",
+            "base": "examples/UdpNtpClient",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        {
+            "name": "UDP Send Receive String",
+            "base": "examples/UDPSendReceiveString",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        { "name": "Web Client", "base": "examples/WebClient", "files": ["src/main.cpp", "platformio.ini"] },
+        {
+            "name": "Web Client Repeating",
+            "base": "examples/WebClientRepeating",
+            "files": ["src/main.cpp", "platformio.ini"]
+        },
+        { "name": "Web Server", "base": "examples/WebServer", "files": ["src/main.cpp", "platformio.ini"] }
     ]
-  },
-  "examples": [
-    {
-      "name": "Basic Web Client",
-      "base": "examples/WebClient"
-    },
-    {
-      "name": "Multi-Instance Architecture",
-      "base": "examples/MultiInstanceDemo"
-    },
-    {
-      "name": "UDP Multicast and Link Monitoring",
-      "base": "examples/Ethernet3ModernizationDemo"
-    },
-    {
-      "name": "Client-Server Multi-Instance",
-      "base": "examples/MultiInstanceClientServerDemo"
-    },
-    {
-      "name": "Platform Optimizations",
-      "base": "examples/PlatformOptimizationDemo"
-    }
-  ]
 }
