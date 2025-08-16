@@ -1,6 +1,6 @@
 /*
  * EthernetChip.h - Abstract Ethernet chip interface for Ethernet3 library
- * 
+ *
  * This file provides a common interface for different Ethernet chips
  * enabling support for W5100, W5500 and future chip variants.
  */
@@ -9,6 +9,7 @@
 #define ETHERNET_CHIP_H
 
 #include <stdint.h>
+
 #include "../hal/EthernetPlatform.h"
 
 // Chip type constants
@@ -20,11 +21,11 @@
  * Specific chip classes (W5100, W5500) should inherit from this class.
  */
 class EthernetChip {
-protected:
+   protected:
     EthernetPlatform* platform;  ///< Unified platform interface
     uint8_t cs_pin;              ///< Chip select pin
 
-public:
+   public:
     /**
      * Constructor
      * @param platform_interface Pointer to unified platform implementation
@@ -32,49 +33,43 @@ public:
      */
     EthernetChip(EthernetPlatform* platform_interface, uint8_t chip_select_pin)
         : platform(platform_interface), cs_pin(chip_select_pin) {}
-    
+
     virtual ~EthernetChip() {}
-    
+
     /**
      * Initialize the chip
      * @return true if initialization successful, false otherwise
      */
     virtual bool init() = 0;
-    
+
     /**
      * Check physical link status
      * @return true if link is active, false otherwise
      */
     virtual bool linkActive() = 0;
-    
+
     /**
      * Get chip type identifier
      * @return Chip type constant (CHIP_TYPE_W5100, CHIP_TYPE_W5500, etc.)
      */
     virtual uint8_t getChipType() = 0;
-    
+
     /**
      * Software reset the chip
      */
     virtual void swReset() = 0;
-    
+
     /**
      * Get chip select pin
      * @return Chip select pin number
      */
     uint8_t getCSPin() const { return cs_pin; }
-    
+
     /**
-     * Get bus interface
-     * @return Pointer to bus interface
+     * @brief Get the underlying platform interface
+     *
      */
-    EthernetBus* getBus() const { return bus; }
-    
-    /**
-     * Get HAL interface
-     * @return Pointer to HAL interface
-     */
-    EthernetHAL* getHAL() const { return hal; }
+    EthernetPlatform* getPlatform() const { return platform; }
 };
 
-#endif // ETHERNET_CHIP_H
+#endif  // ETHERNET_CHIP_H

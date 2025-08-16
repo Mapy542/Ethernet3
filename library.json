@@ -1,6 +1,6 @@
 {
     "name": "Ethernet3",
-    "version": "1.6.0",
+    "version": "1.0.0",
     "description": "Modernized Ethernet library with W5100/W5500 support, multi-instance architecture, and platform optimizations",
     "keywords": [
         "ethernet",
@@ -29,7 +29,7 @@
     "homepage": "https://github.com/Mapy542/Ethernet3",
     "documentation": "https://github.com/Mapy542/Ethernet3/tree/main/docs",
     "frameworks": ["arduino"],
-    "platforms": ["atmelavr", "espressif32", "espressif8266", "stm32", "raspberrypi", "teensy"],
+    "platforms": ["atmelavr", "espressif32", "stm32", "raspberrypi", "teensy"],
     "dependencies": [],
     "export": {
         "exclude": [".git*", ".vscode", "test", "*.tmp", "*.bak"]
