@@ -1,0 +1,69 @@
+{
+    "name": "Ethernet3",
+    "version": "1.0.0",
+    "description": "Modernized Ethernet library with W5100/W5500 support, multi-instance architecture, and platform optimizations",
+    "keywords": [
+        "ethernet",
+        "w5100",
+        "w5500",
+        "networking",
+        "multicast",
+        "multi-instance",
+        "spi",
+        "embedded",
+        "arduino",
+        "esp32",
+        "stm32"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Mapy542/Ethernet3.git"
+    },
+    "authors": [
+        {
+            "name": "Ethernet3 Contributors",
+            "maintainer": true
+        }
+    ],
+    "license": "LGPL-2.1",
+    "homepage": "https://github.com/Mapy542/Ethernet3",
+    "documentation": "https://github.com/Mapy542/Ethernet3/tree/main/docs",
+    "frameworks": ["arduino"],
+    "platforms": ["atmelavr", "espressif32", "stm32", "raspberrypi", "teensy"],
+    "dependencies": [],
+    "export": {
+        "exclude": [".git*", ".vscode", "test", "*.tmp", "*.bak"]
+    },
+    "examples": [
+        {
+            "name": "DHCP Address Printer",
+            "base": "examples/DhcpAddressPrinter",
+            "files": ["DhcpAddressPrinter.ino"]
+        },
+        {
+            "name": "Telnet Client",
+            "base": "examples/TelnetClient",
+            "files": ["TelnetClient.ino"]
+        },
+        {
+            "name": "UDP NTP Client",
+            "base": "examples/UdpNtpClient",
+            "files": ["UdpNtpClient.ino"]
+        },
+        {
+            "name": "UDP Send Receive String",
+            "base": "examples/UDPSendReceiveString",
+            "files": ["UDPSendReceiveString.ino"]
+        },
+        {
+            "name": "Web Client",
+            "base": "examples/WebClient",
+            "files": ["WebClient.ino"]
+        },
+        {
+            "name": "Web Server",
+            "base": "examples/WebServer",
+            "files": ["WebServer.ino"]
+        }
+    ]
+}
