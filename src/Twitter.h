@@ -18,13 +18,8 @@
 #include <avr/pgmspace.h>
 #endif
 
-#if defined(ARDUINO) && ARDUINO > 18  // Arduino 0019 or later
-#include <SPI.h>
-#endif
-#include <Ethernet3.h>
-#if defined(ARDUINO) && ARDUINO < 100  // earlier than Arduino 1.0
-#include <EthernetDNS.h>
-#endif
+#include <Dns.h>
+#include <EthernetClient.h>
 
 class Twitter {
    private:

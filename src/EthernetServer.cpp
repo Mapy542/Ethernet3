@@ -46,8 +46,8 @@ void EthernetServer::begin() {
         EthernetClient client(sock);
         client = EthernetClient(eth);  // Associate with our Ethernet instance
         if (client.status() == SnSR::CLOSED) {
-            eth->socket(sock, SnMR::TCP, _port, 0);
-            eth->listen(sock);
+            eth->_chip->socket(sock, SnMR::TCP, _port, 0);
+            eth->_chip->listen(sock);
             eth->_server_port[sock] = _port;
             break;
         }

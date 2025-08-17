@@ -271,7 +271,7 @@ void* EthernetUDP::getChipInstance() {
 
 // Multicast support implementation
 
-int EthernetUDP::beginMulticast(IPAddress multicast_ip, uint16_t port) {
+uint8_t EthernetUDP::beginMulticast(IPAddress multicast_ip, uint16_t port) {
     if (!isMulticastGroup(multicast_ip)) {
         return 0;  // Invalid multicast IP
     }

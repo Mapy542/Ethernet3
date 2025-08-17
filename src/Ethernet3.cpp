@@ -290,7 +290,9 @@ int Ethernet3Class::begin(uint8_t* mac_address) {
         W5500Class* w5500_inst = w5500_chip->getW5500();
         if (w5500_inst) {
             w5500_inst->setMACAddress(mac_address);
-            w5500_inst->setIPAddress(IPAddress(0, 0, 0, 0).raw_address());
+            // Set initial IP to 0s
+            uint8_t zero_ip[4] = {0, 0, 0, 0};
+            w5500_inst->setIPAddress(zero_ip);
         }
     }
     // Similar for W5100...
@@ -324,7 +326,7 @@ IPAddress Ethernet3Class::localIP() {
         W5500Chip* w5500_chip = static_cast<W5500Chip*>(_chip);
         W5500Class* w5500_inst = w5500_chip->getW5500();
         if (w5500_inst) {
-            w5500_inst->getIPAddress(ret.raw_address());
+            w5500_inst->getIPAddress(&ret[0]);
         }
     }
     // Similar for W5100...
@@ -337,7 +339,7 @@ IPAddress Ethernet3Class::subnetMask() {
         W5500Chip* w5500_chip = static_cast<W5500Chip*>(_chip);
         W5500Class* w5500_inst = w5500_chip->getW5500();
         if (w5500_inst) {
-            w5500_inst->getSubnetMask(ret.raw_address());
+            w5500_inst->getSubnetMask(&ret[0]);
         }
     }
     // Similar for W5100...
@@ -350,7 +352,7 @@ IPAddress Ethernet3Class::gatewayIP() {
         W5500Chip* w5500_chip = static_cast<W5500Chip*>(_chip);
         W5500Class* w5500_inst = w5500_chip->getW5500();
         if (w5500_inst) {
-            w5500_inst->getGatewayIp(ret.raw_address());
+            w5500_inst->getGatewayIp(&ret[0]);
         }
     }
     // Similar for W5100...
