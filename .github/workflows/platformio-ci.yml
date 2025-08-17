@@ -1,0 +1,58 @@
+name: PlatformIO CI
+
+on: [pull_request]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                platform: [uno, megaatmega2560, esp32-c6-devkitc-1]
+                example: [WebClient, DhcpChatServer, WebServer]
+                #exclude:
+                # Exclude resource-intensive examples on smaller platforms
+                #- platform: uno
+                #  example: MultiInstanceDemo
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: '3.x'
+
+            - name: Install PlatformIO
+              run: |
+                  pip install platformio
+                  pio upgrade --dev
+
+            - name: Build Example
+              run: |
+                  pio ci examples/${{ matrix.example }} --board=${{ matrix.platform }} --lib=./
+
+    library-check:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: '3.x'
+
+            - name: Install PlatformIO
+              run: |
+                  pip install platformio
+                  pio upgrade --dev
+
+            - name: Validate Library Manifest
+              run: |
+                  # Basic JSON validation for library.json
+                  python3 -m json.tool library.json > /dev/null
+                  echo "library.json is valid JSON ✓"
+
+            - name: Library Check
+              run: |
+                  mkdir ./dist/
+                  pio package pack --output ./dist/
