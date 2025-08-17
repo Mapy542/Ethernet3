@@ -34,6 +34,7 @@
 #include "Ethernet3.h"  // Modern multi-instance support
 #include "Udp.h"
 #include "chips/utility/socket.h"
+#include "chips/utility/w5500.h"
 
 // Backward compatibility includes
 #ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY

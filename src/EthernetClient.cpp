@@ -1,4 +1,5 @@
 #include "chips/utility/socket.h"
+#include "chips/utility/w5500.h"
 
 extern "C" {
 #include "string.h"

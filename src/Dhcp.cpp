@@ -9,6 +9,7 @@
 #include "Arduino.h"
 #include "Ethernet3.h"  // Modern multi-instance support
 #include "chips/utility/util.h"
+#include "chips/utility/w5500.h"
 
 // Backward compatibility includes
 #ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY

@@ -18,10 +18,9 @@
 #include "chips/EthernetChip.h"
 #include "chips/W5100Chip.h"
 #include "chips/W5500Chip.h"
+#include "chips/utility/w5100.h"
+#include "chips/utility/w5500.h"
 #include "hal/ArduinoPlatform.h"
-
-// Constants for backward compatibility
-#define MAX_SOCK_NUM 8  // Default to W5500's socket count for backward compatibility
 
 // Forward declarations
 class EthernetClient;
