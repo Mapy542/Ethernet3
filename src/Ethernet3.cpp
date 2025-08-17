@@ -13,7 +13,7 @@
 #ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
 // Create global instances for backward compatibility using unified platform architecture
 static ArduinoPlatform global_platform;
-static W5500Chip global_w5500_chip(&w5500, &global_platform, 10);
+static W5500Chip global_w5500_chip(&global_platform, 10);
 
 // Global Ethernet instance for backward compatibility
 Ethernet3Class Ethernet(&global_w5500_chip, false);
@@ -29,7 +29,7 @@ Ethernet3Class::Ethernet3Class()
       _platform(&global_platform),
       _state(nullptr),
       _server_port(nullptr),
-      _max_sockets(MAX_SOCK_NUM),
+      _max_sockets(8),  // W5500 default
       _cs_pin(10),
       _owns_chip(false) {
     initializeInstance();
@@ -45,11 +45,11 @@ Ethernet3Class::Ethernet3Class(EthernetChip* chip, bool owns_chip)
       _server_port(nullptr),
       _owns_chip(owns_chip) {
     if (_chip) {
-        _max_sockets = MAX_SOCK_NUM;  // Default, may be overridden
+        _max_sockets = _chip->getMaxSockets();
         _cs_pin = _chip->getCSPin();
         _platform = _chip->getPlatform();
     } else {
-        _max_sockets = MAX_SOCK_NUM;
+        _max_sockets = 8;  // Default
         _cs_pin = 10;
     }
 
@@ -74,20 +74,12 @@ Ethernet3Class::Ethernet3Class(uint8_t chip_type, uint8_t cs_pin,
 
     // Create appropriate chip instance
     if (chip_type == CHIP_TYPE_W5100) {
-#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
-        _chip = new W5100Chip(&w5100, _platform, cs_pin);
-#else
-        _chip = new W5100Chip(nullptr, _platform, cs_pin);
-#endif
-        _max_sockets = W5100_MAX_SOCK_NUM;
+        _chip = new W5100Chip(_platform, cs_pin);
     } else {  // Default to W5500
-#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
-        _chip = new W5500Chip(&w5500, _platform, cs_pin);
-#else
-        _chip = new W5500Chip(nullptr, _platform, cs_pin);
-#endif
-        _max_sockets = MAX_SOCK_NUM;
+        _chip = new W5500Chip(_platform, cs_pin);
     }
+    
+    _max_sockets = _chip->getMaxSockets();
 
     initializeInstance();
 }
