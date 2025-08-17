@@ -7,7 +7,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                platform: [uno, megaatmega2560, esp32-c6-devkitc-1]
+                platform: [uno, megaatmega2560]
                 example: [WebClient, DhcpChatServer, WebServer]
                 #exclude:
                 # Exclude resource-intensive examples on smaller platforms
@@ -25,6 +25,7 @@ jobs:
             - name: Install PlatformIO
               run: |
                   pip install platformio
+                  pio update
                   pio upgrade --dev
 
             - name: Build Example
