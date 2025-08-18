@@ -18,8 +18,6 @@
 #include "chips/EthernetChip.h"
 #include "chips/W5100Chip.h"
 #include "chips/W5500Chip.h"
-#include "chips/utility/w5100.h"
-#include "chips/utility/w5500.h"
 #include "hal/ArduinoPlatform.h"
 
 // Forward declarations
@@ -46,6 +44,7 @@ class Ethernet3Class {
     uint8_t* _state;
     uint16_t* _server_port;
     uint8_t _max_sockets;
+    uint16_t _next_ephemeral_port = 49152;  // RFC 6335 dynamic port base
 
     // Chip configuration
     uint8_t _cs_pin;
@@ -166,6 +165,31 @@ class Ethernet3Class {
 
     friend class EthernetClient;
     friend class EthernetServer;
+
+   public:
+    // Internal unified socket management API (chip agnostic)
+    /** Allocate a free socket index or return 0xFF if none. */
+    uint8_t allocateSocket();
+    /** Release a previously allocated socket index. */
+    void releaseSocket(uint8_t sock);
+    /** Open (configure + issue OPEN) a socket with protocol+flags. Returns socket index or 0xFF. */
+    uint8_t openSocket(uint8_t protocolMode, uint16_t localPort = 0, uint8_t flags = 0);
+    /** Close a socket (issue CLOSE). */
+    void closeSocket(uint8_t sock);
+    /** Begin listen (TCP). */
+    bool listenSocket(uint8_t sock);
+    /** Connect to remote peer (TCP). */
+    bool connectSocket(uint8_t sock, const uint8_t* ip, uint16_t port);
+    /** Send TCP buffer. */
+    uint16_t sendSocket(uint8_t sock, const uint8_t* data, uint16_t len);
+    /** Receive TCP data (up to len). Returns bytes read. */
+    uint16_t recvSocket(uint8_t sock, uint8_t* data, uint16_t len);
+    /** UDP start datagram (returns buffer start write pointer). */
+    bool startUDPPacket(uint8_t sock, const uint8_t* ip, uint16_t port);
+    /** UDP buffer data (offset based). */
+    uint16_t bufferUDPData(uint8_t sock, uint16_t offset, const uint8_t* data, uint16_t len);
+    /** UDP send datagram (commit). */
+    bool sendUDPPacket(uint8_t sock, uint16_t totalLen);
 
    private:
     /**

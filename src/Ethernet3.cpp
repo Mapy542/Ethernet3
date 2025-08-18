@@ -7,15 +7,13 @@
 #include "Dhcp.h"
 #include "EthernetClient.h"
 #include "EthernetServer.h"
+#include "chips/utility/wiznet_registers.h"
 #include "hal/ArduinoPlatform.h"
 
 // Conditional backward compatibility - only create global instances when needed
 #ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
-// Create global instances for backward compatibility using unified platform architecture
 static ArduinoPlatform global_platform;
-static W5500Chip global_w5500_chip(&w5500, &global_platform, 10);
-
-// Global Ethernet instance for backward compatibility
+static W5500Chip global_w5500_chip(&global_platform, 10);
 Ethernet3Class Ethernet(&global_w5500_chip, false);
 #endif
 
@@ -29,7 +27,7 @@ Ethernet3Class::Ethernet3Class()
       _platform(&global_platform),
       _state(nullptr),
       _server_port(nullptr),
-      _max_sockets(MAX_SOCK_NUM),
+      _max_sockets(global_w5500_chip.maxSockets()),
       _cs_pin(10),
       _owns_chip(false) {
     initializeInstance();
@@ -45,11 +43,11 @@ Ethernet3Class::Ethernet3Class(EthernetChip* chip, bool owns_chip)
       _server_port(nullptr),
       _owns_chip(owns_chip) {
     if (_chip) {
-        _max_sockets = MAX_SOCK_NUM;  // Default, may be overridden
+        _max_sockets = _chip->maxSockets();
         _cs_pin = _chip->getCSPin();
         _platform = _chip->getPlatform();
     } else {
-        _max_sockets = MAX_SOCK_NUM;
+        _max_sockets = 8;
         _cs_pin = 10;
     }
 
@@ -74,20 +72,11 @@ Ethernet3Class::Ethernet3Class(uint8_t chip_type, uint8_t cs_pin,
 
     // Create appropriate chip instance
     if (chip_type == CHIP_TYPE_W5100) {
-#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
-        _chip = new W5100Chip(&w5100, _platform, cs_pin);
-#else
-        _chip = new W5100Chip(nullptr, _platform, cs_pin);
-#endif
-        _max_sockets = W5100_MAX_SOCK_NUM;
+        _chip = new W5100Chip(_platform, cs_pin);
     } else {  // Default to W5500
-#ifndef ETHERNET3_NO_BACKWARDS_COMPATIBILITY
-        _chip = new W5500Chip(&w5500, _platform, cs_pin);
-#else
-        _chip = new W5500Chip(nullptr, _platform, cs_pin);
-#endif
-        _max_sockets = MAX_SOCK_NUM;
+        _chip = new W5500Chip(_platform, cs_pin);
     }
+    _max_sockets = _chip->maxSockets();
 
     initializeInstance();
 }
@@ -141,18 +130,7 @@ void Ethernet3Class::cleanup() {
 void Ethernet3Class::init(uint8_t cs_pin) {
     _cs_pin = cs_pin;
     if (_chip) {
-        // Initialize the chip with new CS pin - this updates the chip's internal CS pin
-        if (_chip->getChipType() == CHIP_TYPE_W5500) {
-            W5500Chip* w5500_chip = static_cast<W5500Chip*>(_chip);
-            if (w5500_chip->getW5500()) {
-                w5500_chip->getW5500()->init(cs_pin);
-            }
-        } else if (_chip->getChipType() == CHIP_TYPE_W5100) {
-            W5100Chip* w5100_chip = static_cast<W5100Chip*>(_chip);
-            if (w5100_chip->getW5100()) {
-                w5100_chip->getW5100()->init(cs_pin);
-            }
-        }
+        (void)_chip->init();
     }
 }
 
@@ -216,102 +194,34 @@ void Ethernet3Class::setServerPort(uint8_t sock, uint16_t port) {
 // The rest of the methods delegate to the existing Ethernet2 implementation
 // For brevity, I'll implement key methods and indicate where others would go
 
-#if defined(WIZ550io_WITH_MACADDRESS)
-int Ethernet3Class::begin(void) {
+int Ethernet3Class::begin(uint8_t* mac_address) {
     if (!_chip) return 0;
-
-    byte mac_address[6] = {
-        0,
-    };
-    if (_dhcp != nullptr) {
+    if (_dhcp) {
         delete _dhcp;
     }
     _dhcp = new DhcpClass();
-
-    // Initialize the chip
     _chip->init();
-
-    // For W5500 compatibility, delegate to w5500 instance
-    if (_chip->getChipType() == CHIP_TYPE_W5500) {
-        W5500Chip* w5500_chip = static_cast<W5500Chip*>(_chip);
-        W5500Class* w5500_inst = w5500_chip->getW5500();
-        if (w5500_inst) {
-            w5500_inst->setIPAddress(IPAddress(0, 0, 0, 0).raw_address());
-            w5500_inst->getMACAddress(mac_address);
-        }
-    }
-
-    // Now try to get our config info from a DHCP server
+    _chip->setMACAddress(mac_address);
+    uint8_t zero_ip[4] = {0, 0, 0, 0};
+    _chip->setIPAddress(zero_ip);
     int ret = _dhcp->beginWithDHCP(mac_address);
     if (ret == 1) {
-        // Set network configuration based on DHCP response
-        if (_chip->getChipType() == CHIP_TYPE_W5500) {
-            W5500Chip* w5500_chip = static_cast<W5500Chip*>(_chip);
-            W5500Class* w5500_inst = w5500_chip->getW5500();
-            if (w5500_inst) {
-                w5500_inst->setIPAddress(_dhcp->getLocalIp().raw_address());
-                w5500_inst->setGatewayIp(_dhcp->getGatewayIp().raw_address());
-                w5500_inst->setSubnetMask(_dhcp->getSubnetMask().raw_address());
-            }
-        }
-        // Similar implementation would be needed for W5100
-
+        _chip->setIPAddress(&(_dhcp->getLocalIp()[0]));
+        _chip->setGatewayIp(&(_dhcp->getGatewayIp()[0]));
+        _chip->setSubnetMask(&(_dhcp->getSubnetMask()[0]));
         _dnsServerAddress = _dhcp->getDnsServerIp();
         _dnsDomainName = _dhcp->getDnsDomainName();
         _hostName = _dhcp->getHostName();
     }
-
     return ret;
 }
 
-// Other WIZ550io methods would follow similar pattern
-void Ethernet3Class::begin(IPAddress local_ip) {
-    // Implementation similar to above but with static IP
-}
-
-// Additional WIZ550io methods...
-#else
-
-int Ethernet3Class::begin(uint8_t* mac_address) {
-    // Implementation for standard Ethernet shields
-    // Similar pattern to WIZ550io version but with MAC address parameter
-    if (!_chip) return 0;
-
-    if (_dhcp != nullptr) {
-        delete _dhcp;
-    }
-    _dhcp = new DhcpClass();
-
-    _chip->init();
-
-    // Configure chip with MAC and attempt DHCP
-    if (_chip->getChipType() == CHIP_TYPE_W5500) {
-        W5500Chip* w5500_chip = static_cast<W5500Chip*>(_chip);
-        W5500Class* w5500_inst = w5500_chip->getW5500();
-        if (w5500_inst) {
-            w5500_inst->setMACAddress(mac_address);
-            // Set initial IP to 0s
-            uint8_t zero_ip[4] = {0, 0, 0, 0};
-            w5500_inst->setIPAddress(zero_ip);
-        }
-    }
-    // Similar for W5100...
-
-    int ret = _dhcp->beginWithDHCP(mac_address);
-    if (ret == 1) {
-        // Apply DHCP configuration...
-    }
-
-    return ret;
-}
-
-// Other standard methods would follow...
 void Ethernet3Class::begin(uint8_t* mac_address, IPAddress local_ip) {
-    // Static IP configuration implementation
+    if (!_chip) return;
+    _chip->init();
+    _chip->setMACAddress(mac_address);
+    _chip->setIPAddress(&(local_ip[0]));
 }
-
-// Additional standard methods...
-#endif
 
 int Ethernet3Class::maintain() {
     if (_dhcp != nullptr) {
@@ -322,40 +232,19 @@ int Ethernet3Class::maintain() {
 
 IPAddress Ethernet3Class::localIP() {
     IPAddress ret;
-    if (_chip && _chip->getChipType() == CHIP_TYPE_W5500) {
-        W5500Chip* w5500_chip = static_cast<W5500Chip*>(_chip);
-        W5500Class* w5500_inst = w5500_chip->getW5500();
-        if (w5500_inst) {
-            w5500_inst->getIPAddress(&ret[0]);
-        }
-    }
-    // Similar for W5100...
+    if (_chip) _chip->getIPAddress(&ret[0]);
     return ret;
 }
 
 IPAddress Ethernet3Class::subnetMask() {
     IPAddress ret;
-    if (_chip && _chip->getChipType() == CHIP_TYPE_W5500) {
-        W5500Chip* w5500_chip = static_cast<W5500Chip*>(_chip);
-        W5500Class* w5500_inst = w5500_chip->getW5500();
-        if (w5500_inst) {
-            w5500_inst->getSubnetMask(&ret[0]);
-        }
-    }
-    // Similar for W5100...
+    if (_chip) _chip->getSubnetMask(&ret[0]);
     return ret;
 }
 
 IPAddress Ethernet3Class::gatewayIP() {
     IPAddress ret;
-    if (_chip && _chip->getChipType() == CHIP_TYPE_W5500) {
-        W5500Chip* w5500_chip = static_cast<W5500Chip*>(_chip);
-        W5500Class* w5500_inst = w5500_chip->getW5500();
-        if (w5500_inst) {
-            w5500_inst->getGatewayIp(&ret[0]);
-        }
-    }
-    // Similar for W5100...
+    if (_chip) _chip->getGatewayIp(&ret[0]);
     return ret;
 }
 
@@ -364,3 +253,126 @@ IPAddress Ethernet3Class::dnsServerIP() { return _dnsServerAddress; }
 char* Ethernet3Class::dnsDomainName() { return _dnsDomainName; }
 
 char* Ethernet3Class::hostName() { return _hostName; }
+
+// ---------------------------------------------------------------------------
+// Internal unified socket management implementation
+// ---------------------------------------------------------------------------
+
+uint8_t Ethernet3Class::allocateSocket() {
+    for (uint8_t i = 0; i < _max_sockets; i++) {
+        if (_state[i] == 0 || _chip->readSocketStatus(i) == WIZ_SnSR_CLOSED) {
+            _state[i] = 1;  // mark allocated
+            return i;
+        }
+    }
+    return 0xFF;
+}
+
+void Ethernet3Class::releaseSocket(uint8_t sock) {
+    if (sock < _max_sockets) {
+        _state[sock] = 0;
+    }
+}
+
+uint8_t Ethernet3Class::openSocket(uint8_t protocolMode, uint16_t localPort, uint8_t flags) {
+    if (!_chip) return 0xFF;
+    uint8_t s = allocateSocket();
+    if (s == 0xFF) return 0xFF;
+    if (localPort == 0) {
+        // allocate ephemeral port
+        if (_next_ephemeral_port < 49152) _next_ephemeral_port = 49152;
+        localPort = _next_ephemeral_port++;
+        if (_next_ephemeral_port == 65535) _next_ephemeral_port = 49152;
+    }
+    _chip->setSocketMode(s, (uint8_t)(protocolMode | flags));
+    _chip->setSocketSourcePort(s, localPort);
+    _chip->execSocketCommand(s, Sock_OPEN);
+    return s;
+}
+
+void Ethernet3Class::closeSocket(uint8_t sock) {
+    if (!_chip || sock >= _max_sockets) return;
+    _chip->execSocketCommand(sock, Sock_CLOSE);
+    _chip->writeSocketInterrupt(sock, 0xFF);  // clear interrupts
+    releaseSocket(sock);
+}
+
+bool Ethernet3Class::listenSocket(uint8_t sock) {
+    if (!_chip || sock >= _max_sockets) return false;
+    if (_chip->readSocketStatus(sock) != WIZ_SnSR_INIT) return false;
+    _chip->execSocketCommand(sock, Sock_LISTEN);
+    return true;
+}
+
+bool Ethernet3Class::connectSocket(uint8_t sock, const uint8_t* ip, uint16_t port) {
+    if (!_chip || sock >= _max_sockets) return false;
+    _chip->setSocketDestination(sock, ip, port);
+    _chip->execSocketCommand(sock, Sock_CONNECT);
+    return true;
+}
+
+uint16_t Ethernet3Class::sendSocket(uint8_t sock, const uint8_t* data, uint16_t len) {
+    if (!_chip || sock >= _max_sockets) return 0;
+    if (len == 0) return 0;
+    uint16_t sendLen = len;
+    uint16_t space;
+    while ((space = _chip->getTXFreeSize(sock)) < sendLen) {
+        uint8_t st = _chip->readSocketStatus(sock);
+        if (st != WIZ_SnSR_ESTABLISHED && st != WIZ_SnSR_CLOSE_WAIT) return 0;
+        // busy wait - could add timeout
+    }
+    _chip->writeSocketData(sock, data, sendLen);
+    _chip->commitTX(sock);
+    // wait for SEND_OK or closure
+    while (true) {
+        uint8_t ir = _chip->readSocketInterrupt(sock);
+        if (ir & WIZ_SnIR_SEND_OK) {
+            _chip->writeSocketInterrupt(sock, WIZ_SnIR_SEND_OK);
+            break;
+        }
+        uint8_t st = _chip->readSocketStatus(sock);
+        if (st == WIZ_SnSR_CLOSED) return 0;  // failed
+    }
+    return sendLen;
+}
+
+uint16_t Ethernet3Class::recvSocket(uint8_t sock, uint8_t* data, uint16_t len) {
+    if (!_chip || sock >= _max_sockets) return 0;
+    uint16_t avail = _chip->getRXReceivedSize(sock);
+    if (avail == 0) return 0;
+    if (avail < len) len = avail;
+    uint16_t rd = _chip->getSocketRXReadPointer(sock);
+    _chip->readSocketData(sock, rd, data, len, true);  // peek read at current pointer
+    rd += len;
+    _chip->setSocketRXReadPointer(sock, rd);
+    _chip->execSocketCommand(sock, Sock_RECV);  // notify chip new data consumed
+    return len;
+}
+
+bool Ethernet3Class::startUDPPacket(uint8_t sock, const uint8_t* ip, uint16_t port) {
+    if (!_chip || sock >= _max_sockets) return false;
+    _chip->setSocketDestination(sock, ip, port);
+    return true;
+}
+
+uint16_t Ethernet3Class::bufferUDPData(uint8_t sock, uint16_t offset, const uint8_t* data,
+                                       uint16_t len) {
+    if (!_chip || sock >= _max_sockets) return 0;
+    _chip->writeSocketDataOffset(sock, offset, data, len);
+    return len;
+}
+
+bool Ethernet3Class::sendUDPPacket(uint8_t sock, uint16_t totalLen) {
+    if (!_chip || sock >= _max_sockets) return false;
+    _chip->advanceTX(sock, totalLen);
+    _chip->commitTX(sock);
+    while (true) {
+        uint8_t ir = _chip->readSocketInterrupt(sock);
+        if (ir & WIZ_SnIR_SEND_OK) {
+            _chip->writeSocketInterrupt(sock, WIZ_SnIR_SEND_OK);
+            return true;
+        }
+        uint8_t st = _chip->readSocketStatus(sock);
+        if (st == WIZ_SnSR_CLOSED) return false;
+    }
+}
