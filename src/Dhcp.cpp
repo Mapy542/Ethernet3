@@ -7,8 +7,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-DhcpClass::DhcpClass(EthernetChip* chip, unsigned long timeout, unsigned long responseTimeout)
-    : _chip(chip), _timeout(timeout), _responseTimeout(responseTimeout), _dhcpUdpSocket(chip) {
+DhcpClass::DhcpClass(EthernetClass* eth, EthernetChip* chip, unsigned long timeout,
+                     unsigned long responseTimeout)
+    : _ethernet(eth),
+      _chip(chip),
+      _timeout(timeout),
+      _responseTimeout(responseTimeout),
+      _dhcpUdpSocket(eth, chip) {
     memset(_dhcpMacAddr, 0, sizeof(_dhcpMacAddr));
     memset(_dhcpLocalIp, 0, sizeof(_dhcpLocalIp));
     memset(_dhcpSubnetMask, 0, sizeof(_dhcpSubnetMask));

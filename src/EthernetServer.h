@@ -11,13 +11,14 @@ class EthernetClient;
 
 class EthernetServer : public Server {
    private:
-    EthernetChip* _chip;  // Pointer to the Ethernet chip interface
+    EthernetClass* _ethernet;  // Pointer to the Ethernet class instance
+    EthernetChip* _chip;       // Pointer to the Ethernet chip interface
     uint16_t _port;
 
     void accept();
 
    public:
-    EthernetServer(EthernetChip* chip, uint16_t port);
+    EthernetServer(EthernetClass* eth, EthernetChip* chip, uint16_t port);
     EthernetClient available();
     virtual void begin();
     virtual size_t write(uint8_t);

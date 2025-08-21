@@ -41,12 +41,12 @@
 #define INVALID_RESPONSE -4
 
 // DNSClient constructor
-DNSClient::DNSClient(EthernetChip* chip)
-    : _chip(chip), iDNSServer(INADDR_NONE), iRequestId(0), iUdp(chip) {
+DNSClient::DNSClient(EthernetClass* eth, EthernetChip* chip)
+    : _ethernet(eth), _chip(chip), iDNSServer(INADDR_NONE), iRequestId(0), iUdp(eth, chip) {
     // Initialize the DNS client with the given Ethernet chip
 }
-DNSClient::DNSClient(EthernetChip* chip, unsigned long timeout)
-    : _chip(chip), iDNSServer(INADDR_NONE), iRequestId(0), iUdp(chip) {
+DNSClient::DNSClient(EthernetClass* eth, EthernetChip* chip, unsigned long timeout)
+    : _ethernet(eth), _chip(chip), iDNSServer(INADDR_NONE), iRequestId(0), iUdp(eth, chip) {
     // Initialize the DNS client with the given Ethernet chip and timeouts
     iUdp.setTimeout(timeout);
 }

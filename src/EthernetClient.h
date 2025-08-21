@@ -10,10 +10,11 @@
 
 class EthernetClient : public Client {
    private:
-    EthernetChip *_chip;  // Pointer to the Ethernet chip interface
+    EthernetClass *_ethernet;  // Pointer to the Ethernet class instance
+    EthernetChip *_chip;       // Pointer to the Ethernet chip interface
    public:
-    EthernetClient(EthernetChip *chip);
-    EthernetClient(EthernetChip *chip, uint8_t sock);
+    EthernetClient(EthernetClass *eth, EthernetChip *chip);
+    EthernetClient(EthernetClass *eth, EthernetChip *chip, uint8_t sock);
 
     uint8_t status();
     virtual int connect(IPAddress ip, uint16_t port);

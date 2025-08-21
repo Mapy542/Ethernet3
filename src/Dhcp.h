@@ -138,7 +138,8 @@ typedef struct _RIP_MSG_FIXED {
 
 class DhcpClass {
    private:
-    EthernetChip* _chip;  // Pointer to the Ethernet chip interface
+    EthernetClass* _ethernet;  // Pointer to the Ethernet class instance
+    EthernetChip* _chip;       // Pointer to the Ethernet chip interface
     uint32_t _dhcpInitialTransactionId;
     uint32_t _dhcpTransactionId;
     uint8_t _dhcpMacAddr[6];
@@ -168,7 +169,7 @@ class DhcpClass {
     uint8_t parseDHCPResponse(unsigned long responseTimeout, uint32_t& transactionId);
 
    public:
-    DhcpClass(EthernetChip* chip, unsigned long timeout = 60000,
+    DhcpClass(EthernetClass* eth, EthernetChip* chip, unsigned long timeout = 60000,
               unsigned long responseTimeout = 5000);
     IPAddress getLocalIp();
     IPAddress getSubnetMask();

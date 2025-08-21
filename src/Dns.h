@@ -10,14 +10,14 @@
 
 #include "Dns.h"
 #include "EthernetUdp2.h"
-#include "chips/neww5500.h"
 #include "chips/utility/socket.h"
 #include "chips/utility/wiznet_registers.h"
+#include "chips/w5500.h"
 
 class DNSClient {
    public:
-    DNSClient(EthernetChip* chip);
-    DNSClient(EthernetChip* chip, unsigned long timeout);
+    DNSClient(EthernetClass* eth, EthernetChip* chip);
+    DNSClient(EthernetClass* eth, EthernetChip* chip, unsigned long timeout);
 
     // ctor
     void begin(const IPAddress& aDNSServer);
@@ -39,7 +39,8 @@ class DNSClient {
     int getHostByName(const char* aHostname, IPAddress& aResult);
 
    protected:
-    EthernetChip* _chip;  // Pointer to the Ethernet chip interface
+    EthernetClass* _ethernet;  // Pointer to the Ethernet class instance
+    EthernetChip* _chip;       // Pointer to the Ethernet chip interface
     uint16_t BuildRequest(const char* aName);
     uint16_t ProcessResponse(uint16_t aTimeout, IPAddress& aAddress);
 

@@ -8,17 +8,19 @@ extern "C" {
 
 uint16_t EthernetClient::_srcport = 1024;  // default ephemeral port?
 
-EthernetClient::EthernetClient(EthernetChip* chip) : _chip(chip), _sock(MAX_SOCK_NUM) {}
+EthernetClient::EthernetClient(EthernetClass* eth, EthernetChip* chip)
+    : _ethernet(eth), _chip(chip), _sock(MAX_SOCK_NUM) {}
 
-EthernetClient::EthernetClient(EthernetChip* chip, uint8_t sock) : _chip(chip), _sock(sock) {}
+EthernetClient::EthernetClient(EthernetClass* eth, EthernetChip* chip, uint8_t sock)
+    : _ethernet(eth), _chip(chip), _sock(sock) {}
 
 int EthernetClient::connect(const char* host, uint16_t port) {
     // Look up the host first
     int ret = 0;
-    DNSClient dns(_chip);
+    DNSClient dns(_ethernet, _chip);
     IPAddress remote_addr;
 
-    dns.begin(Ethernet.dnsServerIP());
+    dns.begin(_ethernet->dnsServerIP());
     ret = dns.getHostByName(host, remote_addr);
     if (ret == 1) {
         return connect(remote_addr, port);

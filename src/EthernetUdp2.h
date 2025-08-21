@@ -51,16 +51,17 @@
 
 class EthernetUDP : public UDP {
    private:
-    EthernetChip* _chip;   // Pointer to the Ethernet chip interface
-    uint8_t _sock;         // socket ID for Wiz5100
-    uint16_t _port;        // local port to listen on
+    EthernetClass* _ethernet;  // Pointer to the Ethernet class instance
+    EthernetChip* _chip;       // Pointer to the Ethernet chip interface
+    uint8_t _sock;             // socket ID for Wiz5100
+    uint16_t _port;            // local port to listen on
     IPAddress _remoteIP;   // remote IP address for the incoming packet whilst it's being processed
     uint16_t _remotePort;  // remote port for the incoming packet whilst it's being processed
     uint16_t _offset;      // offset into the packet being sent
     uint16_t _remaining;   // remaining bytes of incoming packet yet to be processed
 
    public:
-    EthernetUDP(EthernetChip* chip);  // Constructor
+    EthernetUDP(EthernetClass* eth, EthernetChip* chip);  // Constructor
     virtual uint8_t begin(
         uint16_t port);   // initialize, start listening on specified port. Returns 1 if
                           // successful, 0 if there are no sockets available to use

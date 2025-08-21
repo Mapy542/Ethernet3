@@ -18,9 +18,9 @@
 #include "EthernetClient.h"
 #include "EthernetServer.h"
 #include "IPAddress.h"
-#include "chips/neww5500.h"
 #include "chips/utility/socket.h"
 #include "chips/utility/wiznet_registers.h"
+#include "chips/w5500.h"
 
 class EthernetClass {
    private:
@@ -71,7 +71,5 @@ class EthernetClass {
     friend class EthernetClient;
     friend class EthernetServer;
 };
-
-extern EthernetClass Ethernet;
 
 #endif

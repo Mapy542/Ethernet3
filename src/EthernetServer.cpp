@@ -5,11 +5,12 @@ extern "C" {
 
 #include "EthernetServer.h"
 
-EthernetServer::EthernetServer(EthernetChip* chip, uint16_t port) : _chip(chip), _port(port) {}
+EthernetServer::EthernetServer(EthernetClass* eth, EthernetChip* chip, uint16_t port)
+    : _ethernet(eth), _chip(chip), _port(port) {}
 
 void EthernetServer::begin() {
     for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-        EthernetClient client(_chip, sock);
+        EthernetClient client(_ethernet, _chip, sock);
         if (client.status() == SnSR::CLOSED) {
             socket(_chip, sock, SnMR::TCP, _port, 0);
             listen(_chip, sock);
@@ -23,7 +24,7 @@ void EthernetServer::accept() {
     int listening = 0;
 
     for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-        EthernetClient client(_chip, sock);
+        EthernetClient client(_ethernet, _chip, sock);
 
         if (EthernetClass::_server_port[sock] == _port) {
             if (client.status() == SnSR::LISTEN) {
@@ -43,7 +44,7 @@ EthernetClient EthernetServer::available() {
     accept();
 
     for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-        EthernetClient client(_chip, sock);
+        EthernetClient client(_ethernet, _chip, sock);
         if (EthernetClass::_server_port[sock] == _port &&
             (client.status() == SnSR::ESTABLISHED || client.status() == SnSR::CLOSE_WAIT)) {
             if (client.available()) {
@@ -53,7 +54,7 @@ EthernetClient EthernetServer::available() {
         }
     }
 
-    return EthernetClient(_chip, MAX_SOCK_NUM);
+    return EthernetClient(_ethernet, _chip, MAX_SOCK_NUM);
 }
 
 size_t EthernetServer::write(uint8_t b) { return write(&b, 1); }
@@ -64,7 +65,7 @@ size_t EthernetServer::write(const uint8_t* buffer, size_t size) {
     accept();
 
     for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-        EthernetClient client(_chip, sock);
+        EthernetClient client(_ethernet, _chip, sock);
 
         if (EthernetClass::_server_port[sock] == _port && client.status() == SnSR::ESTABLISHED) {
             n += client.write(buffer, size);
