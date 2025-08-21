@@ -33,7 +33,7 @@ IPAddress subnet(255, 255, 0, 0);
 
 // Init the desired ethernet chip
 W5500 chip(10);  // 10 is the CS pin for the W5500 chip
-// W5100 chip(10); // todo!
+// W5100 chip(10);
 
 EthernetClass Ethernet(&chip);
 
