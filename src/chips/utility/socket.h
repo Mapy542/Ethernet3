@@ -11,7 +11,7 @@
 #include "../EthernetChip.h"
 #include "wiznet_registers.h"
 
-typedef uint8_t SOCKET;
+class EthernetChip;  // Forward declare the class to break the circular dependency.
 
 extern uint8_t socket(EthernetChip* chip, SOCKET s, uint8_t protocol, uint16_t port,
                       uint8_t flag);              // Opens a socket(TCP or UDP or IP_RAW mode)

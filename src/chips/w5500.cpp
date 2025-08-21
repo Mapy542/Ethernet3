@@ -193,3 +193,8 @@ void W5500::execCmdSn(SOCKET s, SockCMD _cmd) {
     // Wait for command to complete
     while (readSnCR(s));
 }
+
+uint8_t W5500::getChipType() {
+    // Read the chip type from the MR register
+    return readMR() & 0x07;  // Mask to get only the chip type bits
+}

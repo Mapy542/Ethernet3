@@ -181,5 +181,3 @@ IPAddress EthernetClass::dnsServerIP() { return _dnsServerAddress; }
 char* EthernetClass::dnsDomainName() { return _dnsDomainName; }
 
 char* EthernetClass::hostName() { return _hostName; }
-
-EthernetClass Ethernet;

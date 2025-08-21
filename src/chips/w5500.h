@@ -22,18 +22,6 @@ class W5500 : public EthernetChip {
     virtual uint8_t getChipType() override;
     virtual void swReset() override;
 
-    virtual uint8_t readSn(SOCKET _s, uint16_t _addr) override;
-    virtual uint8_t writeSn(SOCKET _s, uint16_t _addr, uint8_t _data) override;
-    virtual uint16_t readSn(SOCKET _s, uint16_t _addr, uint8_t* _buf, uint16_t len) override;
-    virtual uint16_t writeSn(SOCKET _s, uint16_t _addr, uint8_t* _buf, uint16_t len) override;
-
-    virtual uint8_t write(uint16_t _addr, uint8_t _cb, uint8_t _data) override;
-    virtual uint16_t write(uint16_t _addr, uint8_t _cb, const uint8_t* buf, uint16_t len) override;
-    virtual uint8_t read(uint16_t _addr, uint8_t _cb) override;
-    virtual uint16_t read(uint16_t _addr, uint8_t _cb, uint8_t* buf, uint16_t len) override;
-
-    virtual void execCmdSn(SOCKET sock, SockCMD _cmd) override;
-
     // ---------------------------------------------------------------------
     // Common network configuration accessors (must be implemented)
     // ---------------------------------------------------------------------

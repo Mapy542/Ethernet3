@@ -284,7 +284,6 @@ void flush(EthernetChip* chip, SOCKET s) {
 }
 
 uint16_t igmpsend(EthernetChip* chip, SOCKET s, const uint8_t* buf, uint16_t len) {
-    uint8_t status = 0;
     uint16_t ret = 0;
 
     if (len > chip->SSIZE)
@@ -298,7 +297,7 @@ uint16_t igmpsend(EthernetChip* chip, SOCKET s, const uint8_t* buf, uint16_t len
     chip->execCmdSn(s, Sock_SEND);
 
     while ((chip->readSnIR(s) & SnIR::SEND_OK) != SnIR::SEND_OK) {
-        status = chip->readSnSR(s);
+        chip->readSnSR(s);
         if (chip->readSnIR(s) & SnIR::TIMEOUT) {
             /* in case of igmp, if send fails, then socket closed */
             /* if you want change, remove this code. */

@@ -4,9 +4,13 @@
 #ifndef Dhcp_h
 #define Dhcp_h
 
+#include "Ethernet3.h"
 #include "EthernetUdp2.h"
 #include "chips/EthernetChip.h"
 #include "chips/utility/util.h"
+
+class EthernetClass;  // Forward declaration to avoid circular dependency
+class EthernetChip;   // Forward declaration to avoid circular dependency
 
 /* DHCP state machine. */
 #define STATE_DHCP_START 0

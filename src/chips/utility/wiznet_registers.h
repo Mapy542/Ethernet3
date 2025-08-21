@@ -10,6 +10,7 @@
 #define WIZNET_REGISTERS_H
 
 #include <stdint.h>
+typedef uint8_t SOCKET;
 
 //==============================================================================
 //--- Common WIZnet Chip Constants ---------------------------------------------

@@ -67,7 +67,7 @@ void EthernetUDP::stop() {
 
     close(_chip, _sock);
 
-    EthernetClass::_server_port[_sock] = 0;
+    _ethernet->_server_port[_sock] = 0;
     _sock = MAX_SOCK_NUM;
 }
 

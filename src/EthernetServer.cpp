@@ -14,7 +14,7 @@ void EthernetServer::begin() {
         if (client.status() == SnSR::CLOSED) {
             socket(_chip, sock, SnMR::TCP, _port, 0);
             listen(_chip, sock);
-            EthernetClass::_server_port[sock] = _port;
+            _ethernet->_server_port[sock] = _port;
             break;
         }
     }
@@ -26,7 +26,7 @@ void EthernetServer::accept() {
     for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
         EthernetClient client(_ethernet, _chip, sock);
 
-        if (EthernetClass::_server_port[sock] == _port) {
+        if (_ethernet->_server_port[sock] == _port) {
             if (client.status() == SnSR::LISTEN) {
                 listening = 1;
             } else if (client.status() == SnSR::CLOSE_WAIT && !client.available()) {
@@ -45,7 +45,7 @@ EthernetClient EthernetServer::available() {
 
     for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
         EthernetClient client(_ethernet, _chip, sock);
-        if (EthernetClass::_server_port[sock] == _port &&
+        if (_ethernet->_server_port[sock] == _port &&
             (client.status() == SnSR::ESTABLISHED || client.status() == SnSR::CLOSE_WAIT)) {
             if (client.available()) {
                 // XXX: don't always pick the lowest numbered socket.
@@ -67,7 +67,7 @@ size_t EthernetServer::write(const uint8_t* buffer, size_t size) {
     for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
         EthernetClient client(_ethernet, _chip, sock);
 
-        if (EthernetClass::_server_port[sock] == _port && client.status() == SnSR::ESTABLISHED) {
+        if (_ethernet->_server_port[sock] == _port && client.status() == SnSR::ESTABLISHED) {
             n += client.write(buffer, size);
         }
     }

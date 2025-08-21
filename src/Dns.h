@@ -8,12 +8,14 @@
 #include <Arduino.h>
 #include <string.h>
 
-#include "Dns.h"
+#include "Ethernet3.h"
 #include "EthernetUdp2.h"
 #include "chips/utility/socket.h"
 #include "chips/utility/wiznet_registers.h"
 #include "chips/w5500.h"
 
+// Forward declare the class to break the circular dependency.
+class EthernetClass;
 class DNSClient {
    public:
     DNSClient(EthernetClass* eth, EthernetChip* chip);

@@ -12,67 +12,72 @@
 #include <SPI.h>
 #include <stdint.h>
 
+#include "utility/socket.h"
 #include "utility/wiznet_registers.h"
 
 // Register Interface Macros
 
-#define __SOCKET_REGISTER8(name, address)                                               \
-    inline void write##name(uint8_t _s, uint8_t _data) { writeSn(_s, address, _data); } \
-    inline uint8_t read##name(uint8_t _s) { return readSn(_s, address); }
+#define __SOCKET_REGISTER8(name, address)                                                       \
+    inline void write##name(SOCKET _s, uint8_t _data) override { writeSn(_s, address, _data); } \
+    inline uint8_t read##name(SOCKET _s) override { return readSn(_s, address); }
 
-#define __SOCKET_REGISTER16(name, address)          \
-    void write##name(uint8_t _s, uint16_t _data) {  \
-        writeSn(_s, address, _data >> 8);           \
-        writeSn(_s, address + 1, _data & 0xFF);     \
-    }                                               \
-    uint16_t read##name(uint8_t _s) {               \
-        uint16_t res = readSn(_s, address);         \
-        res = (res << 8) + readSn(_s, address + 1); \
-        return res;                                 \
+#define __SOCKET_REGISTER16(name, address)                 \
+    void write##name(SOCKET _s, uint16_t _data) override { \
+        writeSn(_s, address, _data >> 8);                  \
+        writeSn(_s, address + 1, _data & 0xFF);            \
+    }                                                      \
+    uint16_t read##name(SOCKET _s) override {              \
+        uint16_t res = readSn(_s, address);                \
+        res = (res << 8) + readSn(_s, address + 1);        \
+        return res;                                        \
     }
 
-#define __SOCKET_REGISTER_N(name, address, size)                                                   \
-    uint16_t write##name(uint8_t _s, uint8_t* _buff) { return writeSn(_s, address, _buff, size); } \
-    uint16_t read##name(uint8_t _s, uint8_t* _buff) { return readSn(_s, address, _buff, size); }
+#define __SOCKET_REGISTER_N(name, address, size)               \
+    uint16_t write##name(SOCKET _s, uint8_t* _buff) override { \
+        return writeSn(_s, address, _buff, size);              \
+    }                                                          \
+    uint16_t read##name(SOCKET _s, uint8_t* _buff) override {  \
+        return readSn(_s, address, _buff, size);               \
+    }
 
 // Socket Register Interface Macros DEF Only
 
-#define __SOCKET_REGISTER8_DEF(name)                                \
-    virtual inline void write##name(uint8_t _s, uint8_t _data) = 0; \
-    virtual inline uint8_t read##name(uint8_t _s) = 0;
+#define __SOCKET_REGISTER8_DEF(name)                        \
+    virtual void write##name(SOCKET _s, uint8_t _data) = 0; \
+    virtual uint8_t read##name(SOCKET _s) = 0;
 
-#define __SOCKET_REGISTER16_DEF(name)                         \
-    virtual void write##name(uint8_t _s, uint16_t _data) = 0; \
-    virtual uint16_t read##name(uint8_t _s) = 0;
+#define __SOCKET_REGISTER16_DEF(name)                        \
+    virtual void write##name(SOCKET _s, uint16_t _data) = 0; \
+    virtual uint16_t read##name(SOCKET _s) = 0;
 
-#define __SOCKET_REGISTER_N_DEF(name)                             \
-    virtual uint16_t write##name(uint8_t _s, uint8_t* _buff) = 0; \
-    virtual uint16_t read##name(uint8_t _s, uint8_t* _buff) = 0;
+#define __SOCKET_REGISTER_N_DEF(name)                            \
+    virtual uint16_t write##name(SOCKET _s, uint8_t* _buff) = 0; \
+    virtual uint16_t read##name(SOCKET _s, uint8_t* _buff) = 0;
 
 // GP Register Interface Macros (w5500 specific??)
 
-#define __GP_REGISTER8(name, address)                                       \
-    inline void write##name(uint8_t _data) { write(address, 0x04, _data); } \
-    inline uint8_t read##name() { return read(address, 0x00); }
+#define __GP_REGISTER8(name, address)                                                \
+    inline void write##name(uint8_t _data) override { write(address, 0x04, _data); } \
+    inline uint8_t read##name() override { return read(address, 0x00); }
 #define __GP_REGISTER16(name, address)              \
-    void write##name(uint16_t _data) {              \
+    void write##name(uint16_t _data) override {     \
         write(address, 0x04, _data >> 8);           \
         write(address + 1, 0x04, _data & 0xFF);     \
     }                                               \
-    uint16_t read##name() {                         \
+    uint16_t read##name() override {                \
         uint16_t res = read(address, 0x00);         \
         res = (res << 8) + read(address + 1, 0x00); \
         return res;                                 \
     }
-#define __GP_REGISTER_N(name, address, size)                                           \
-    uint16_t write##name(uint8_t* _buff) { return write(address, 0x04, _buff, size); } \
-    uint16_t read##name(uint8_t* _buff) { return read(address, 0x00, _buff, size); }
+#define __GP_REGISTER_N(name, address, size)                                                    \
+    uint16_t write##name(uint8_t* _buff) override { return write(address, 0x04, _buff, size); } \
+    uint16_t read##name(uint8_t* _buff) override { return read(address, 0x00, _buff, size); }
 
 // GP Register Interface Macro Def ONLY
 
-#define __GP_REGISTER8_DEF(name)                        \
-    virtual inline void write##name(uint8_t _data) = 0; \
-    virtual inline uint8_t read##name() = 0;
+#define __GP_REGISTER8_DEF(name)                 \
+    virtual void write##name(uint8_t _data) = 0; \
+    virtual uint8_t read##name() = 0;
 
 #define __GP_REGISTER16_DEF(name)                 \
     virtual void write##name(uint16_t _data) = 0; \
@@ -228,10 +233,10 @@ class EthernetChip {
     virtual uint16_t getTXFreeSize(uint8_t sock) = 0;
     virtual uint16_t getRXReceivedSize(uint8_t sock) = 0;
 
-    virtual uint8_t readSn(uint8_t _s, uint16_t _addr) = 0;
-    virtual uint8_t writeSn(uint8_t _s, uint16_t _addr, uint8_t _data) = 0;
-    virtual uint16_t readSn(uint8_t _s, uint16_t _addr, uint8_t* _buf, uint16_t len) = 0;
-    virtual uint16_t writeSn(uint8_t _s, uint16_t _addr, uint8_t* _buf, uint16_t len) = 0;
+    virtual uint8_t readSn(SOCKET _s, uint16_t _addr) = 0;
+    virtual uint8_t writeSn(SOCKET _s, uint16_t _addr, uint8_t _data) = 0;
+    virtual uint16_t readSn(SOCKET _s, uint16_t _addr, uint8_t* _buf, uint16_t len) = 0;
+    virtual uint16_t writeSn(SOCKET _s, uint16_t _addr, uint8_t* _buf, uint16_t len) = 0;
 
     virtual uint8_t write(uint16_t _addr, uint8_t _cb, uint8_t _data) = 0;
     virtual uint16_t write(uint16_t _addr, uint8_t _cb, const uint8_t* buf, uint16_t len) = 0;

@@ -44,10 +44,13 @@
 
 #include <Udp.h>
 
-#include "Dns.h"
+// #include "Dns.h"
 #include "Ethernet3.h"
 #include "chips/EthernetChip.h"
 #include "chips/utility/socket.h"
+
+class DNSClient;      // Forward declaration to avoid circular dependency
+class EthernetClass;  // Forward declaration to avoid circular dependency
 
 class EthernetUDP : public UDP {
    private:

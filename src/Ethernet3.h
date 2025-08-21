@@ -22,6 +22,9 @@
 #include "chips/utility/wiznet_registers.h"
 #include "chips/w5500.h"
 
+class DhcpClass;  // Forward declaration to avoid circular dependency
+class EthernetChip;
+
 class EthernetClass {
    private:
     EthernetChip* _chip;
@@ -31,10 +34,10 @@ class EthernetClass {
     DhcpClass* _dhcp;
 
    public:
-    static uint8_t _state[MAX_SOCK_NUM];
-    static uint16_t _server_port[MAX_SOCK_NUM];
+    uint8_t _state[MAX_SOCK_NUM];
+    uint16_t _server_port[MAX_SOCK_NUM];
 
-    EthernetClass(EthernetChip* chip) : _chip(chip) { _dhcp = NULL; }
+    EthernetClass(EthernetChip* chip) : _chip(chip) { _dhcp = nullptr; }
 
 #if defined(WIZ550io_WITH_MACADDRESS)
     // Initialize function when use the ioShield serise (included WIZ550io)
