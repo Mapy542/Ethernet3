@@ -14,6 +14,12 @@ EthernetClient::EthernetClient(EthernetClass* eth, EthernetChip* chip)
 EthernetClient::EthernetClient(EthernetClass* eth, EthernetChip* chip, uint8_t sock)
     : _ethernet(eth), _chip(chip), _sock(sock) {}
 
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+EthernetClient::EthernetClient() : _ethernet(&Ethernet), _chip(&defaultChip), _sock(MAX_SOCK_NUM) {}
+
+EthernetClient::EthernetClient(uint8_t sock) : _ethernet(&Ethernet), _chip(&defaultChip), _sock(sock) {}
+#endif
+
 int EthernetClient::connect(const char* host, uint16_t port) {
     // Look up the host first
     int ret = 0;

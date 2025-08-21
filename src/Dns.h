@@ -16,10 +16,22 @@
 
 // Forward declare the class to break the circular dependency.
 class EthernetClass;
+
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+// Forward declarations for global instances
+extern class W5500 defaultChip;
+extern class EthernetClass Ethernet;
+#endif
 class DNSClient {
    public:
     DNSClient(EthernetClass* eth, EthernetChip* chip);
     DNSClient(EthernetClass* eth, EthernetChip* chip, unsigned long timeout);
+    
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+    // Backwards compatibility constructors that use global instances
+    DNSClient();
+    DNSClient(unsigned long timeout);
+#endif
 
     // ctor
     void begin(const IPAddress& aDNSServer);

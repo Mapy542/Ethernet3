@@ -14,9 +14,6 @@
 
  */
 
-#include "Dhcp.h"
-#include "EthernetClient.h"
-#include "EthernetServer.h"
 #include "IPAddress.h"
 #include "chips/utility/socket.h"
 #include "chips/utility/wiznet_registers.h"
@@ -24,6 +21,10 @@
 
 class DhcpClass;  // Forward declaration to avoid circular dependency
 class EthernetChip;
+
+// Forward declarations for backwards compatibility
+class EthernetClient;
+class EthernetServer;
 
 class EthernetClass {
    private:
@@ -74,5 +75,11 @@ class EthernetClass {
     friend class EthernetClient;
     friend class EthernetServer;
 };
+
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+// Default chip and ethernet instances for backwards compatibility
+extern W5500 defaultChip;
+extern EthernetClass Ethernet;
+#endif
 
 #endif

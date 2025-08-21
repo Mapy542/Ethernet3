@@ -36,6 +36,10 @@
 EthernetUDP::EthernetUDP(EthernetClass* eth, EthernetChip* chip)
     : _ethernet(eth), _chip(chip), _sock(MAX_SOCK_NUM) {}
 
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+EthernetUDP::EthernetUDP() : _ethernet(&Ethernet), _chip(&defaultChip), _sock(MAX_SOCK_NUM) {}
+#endif
+
 /* Start EthernetUDP socket, listening at local port PORT */
 uint8_t EthernetUDP::begin(uint16_t port) {
     if (_sock != MAX_SOCK_NUM) return 0;

@@ -52,6 +52,12 @@
 class DNSClient;      // Forward declaration to avoid circular dependency
 class EthernetClass;  // Forward declaration to avoid circular dependency
 
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+// Forward declarations for global instances
+extern class W5500 defaultChip;
+extern class EthernetClass Ethernet;
+#endif
+
 class EthernetUDP : public UDP {
    private:
     EthernetClass* _ethernet;  // Pointer to the Ethernet class instance
@@ -65,6 +71,11 @@ class EthernetUDP : public UDP {
 
    public:
     EthernetUDP(EthernetClass* eth, EthernetChip* chip);  // Constructor
+    
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+    // Backwards compatibility constructor that uses global instances  
+    EthernetUDP();
+#endif
     virtual uint8_t begin(
         uint16_t port);   // initialize, start listening on specified port. Returns 1 if
                           // successful, 0 if there are no sockets available to use

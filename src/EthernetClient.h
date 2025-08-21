@@ -8,6 +8,12 @@
 #include "chips/EthernetChip.h"
 #include "chips/utility/socket.h"
 
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+// Forward declarations for global instances
+extern class W5500 defaultChip;
+extern class EthernetClass Ethernet;
+#endif
+
 class EthernetClient : public Client {
    private:
     EthernetClass *_ethernet;  // Pointer to the Ethernet class instance
@@ -15,6 +21,12 @@ class EthernetClient : public Client {
    public:
     EthernetClient(EthernetClass *eth, EthernetChip *chip);
     EthernetClient(EthernetClass *eth, EthernetChip *chip, uint8_t sock);
+    
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+    // Backwards compatibility constructors that use global instances
+    EthernetClient();
+    EthernetClient(uint8_t sock);
+#endif
 
     uint8_t status();
     virtual int connect(IPAddress ip, uint16_t port);

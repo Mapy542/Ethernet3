@@ -25,6 +25,25 @@ DhcpClass::DhcpClass(EthernetClass* eth, EthernetChip* chip, unsigned long timeo
     reset_DHCP_lease();
 }
 
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+DhcpClass::DhcpClass(unsigned long timeout, unsigned long responseTimeout)
+    : _ethernet(&Ethernet),
+      _chip(&defaultChip),
+      _timeout(timeout),
+      _responseTimeout(responseTimeout),
+      _dhcpUdpSocket(&Ethernet, &defaultChip) {
+    memset(_dhcpMacAddr, 0, sizeof(_dhcpMacAddr));
+    memset(_dhcpLocalIp, 0, sizeof(_dhcpLocalIp));
+    memset(_dhcpSubnetMask, 0, sizeof(_dhcpSubnetMask));
+    memset(_dhcpGatewayIp, 0, sizeof(_dhcpGatewayIp));
+    memset(_dhcpDhcpServerIp, 0, sizeof(_dhcpDhcpServerIp));
+    memset(_dhcpDnsServerIp, 0, sizeof(_dhcpDnsServerIp));
+    _dhcpDnsdomainName = NULL;
+    _dhcpHostName = NULL;
+    reset_DHCP_lease();
+}
+#endif
+
 int DhcpClass::beginWithDHCP(uint8_t* mac, unsigned long timeout, unsigned long responseTimeout) {
     _dhcpLeaseTime = 0;
     _dhcpT1 = 0;

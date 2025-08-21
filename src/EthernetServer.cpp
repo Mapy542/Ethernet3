@@ -8,6 +8,10 @@ extern "C" {
 EthernetServer::EthernetServer(EthernetClass* eth, EthernetChip* chip, uint16_t port)
     : _ethernet(eth), _chip(chip), _port(port) {}
 
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+EthernetServer::EthernetServer(uint16_t port) : _ethernet(&Ethernet), _chip(&defaultChip), _port(port) {}
+#endif
+
 void EthernetServer::begin() {
     for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
         EthernetClient client(_ethernet, _chip, sock);

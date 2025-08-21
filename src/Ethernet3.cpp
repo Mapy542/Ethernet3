@@ -9,6 +9,13 @@
  */
 
 #include "Ethernet3.h"
+#include "Dhcp.h"
+
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+// Default chip instance using CS pin 10 (common default for Arduino Ethernet shields)
+W5500 defaultChip(10);
+EthernetClass Ethernet(&defaultChip);
+#endif
 
 #if defined(WIZ550io_WITH_MACADDRESS)
 int EthernetClass::begin(void) {

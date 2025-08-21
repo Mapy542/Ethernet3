@@ -12,6 +12,12 @@
 class EthernetClass;  // Forward declaration to avoid circular dependency
 class EthernetChip;   // Forward declaration to avoid circular dependency
 
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+// Forward declarations for global instances
+extern class W5500 defaultChip;
+extern class EthernetClass Ethernet;
+#endif
+
 /* DHCP state machine. */
 #define STATE_DHCP_START 0
 #define STATE_DHCP_DISCOVER 1
@@ -175,6 +181,11 @@ class DhcpClass {
    public:
     DhcpClass(EthernetClass* eth, EthernetChip* chip, unsigned long timeout = 60000,
               unsigned long responseTimeout = 5000);
+              
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+    // Backwards compatibility constructor that uses global instances
+    DhcpClass(unsigned long timeout = 60000, unsigned long responseTimeout = 5000);
+#endif
     IPAddress getLocalIp();
     IPAddress getSubnetMask();
     IPAddress getGatewayIp();

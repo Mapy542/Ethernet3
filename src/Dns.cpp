@@ -51,6 +51,19 @@ DNSClient::DNSClient(EthernetClass* eth, EthernetChip* chip, unsigned long timeo
     iUdp.setTimeout(timeout);
 }
 
+#ifdef ETHERNET_BACKWARDS_COMPATIBILITY
+DNSClient::DNSClient()
+    : _ethernet(&Ethernet), _chip(&defaultChip), iDNSServer(INADDR_NONE), iRequestId(0), iUdp(&Ethernet, &defaultChip) {
+    // Initialize the DNS client with global instances
+}
+
+DNSClient::DNSClient(unsigned long timeout)
+    : _ethernet(&Ethernet), _chip(&defaultChip), iDNSServer(INADDR_NONE), iRequestId(0), iUdp(&Ethernet, &defaultChip) {
+    // Initialize the DNS client with global instances and timeout
+    iUdp.setTimeout(timeout);
+}
+#endif
+
 void DNSClient::begin(const IPAddress& aDNSServer) {
     iDNSServer = aDNSServer;
     iRequestId = 0;
