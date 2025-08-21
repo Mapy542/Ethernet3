@@ -129,19 +129,19 @@ class EthernetChip {
     // Common network configuration accessors (must be implemented)
     // ---------------------------------------------------------------------
     /** Set gateway IPv4 address (4 bytes) */
-    virtual void setGatewayIp(const uint8_t* addr) = 0;
+    virtual void setGatewayIp(uint8_t* addr) = 0;
     /** Get gateway IPv4 address (4 bytes) */
     virtual void getGatewayIp(uint8_t* addr) = 0;
     /** Set subnet mask (4 bytes) */
-    virtual void setSubnetMask(const uint8_t* addr) = 0;
+    virtual void setSubnetMask(uint8_t* addr) = 0;
     /** Get subnet mask (4 bytes) */
     virtual void getSubnetMask(uint8_t* addr) = 0;
     /** Set MAC address (6 bytes) */
-    virtual void setMACAddress(const uint8_t* addr) = 0;
+    virtual void setMACAddress(uint8_t* addr) = 0;
     /** Get MAC address (6 bytes) */
     virtual void getMACAddress(uint8_t* addr) = 0;
     /** Set IPv4 address (4 bytes) */
-    virtual void setIPAddress(const uint8_t* addr) = 0;
+    virtual void setIPAddress(uint8_t* addr) = 0;
     /** Get IPv4 address (4 bytes) */
     virtual void getIPAddress(uint8_t* addr) = 0;
     /** Set retransmission timeout (ms units per chip spec) */
