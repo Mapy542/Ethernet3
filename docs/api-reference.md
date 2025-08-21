@@ -7,29 +7,36 @@
 The main Ethernet interface class that manages network configuration and chip communication.
 
 #### Constructor
+
 ```cpp
 EthernetClass(EthernetChip* chip)
 ```
+
 Creates an Ethernet instance using the specified chip interface.
 
 #### Initialization Methods
 
 ##### DHCP Initialization
+
 ```cpp
 int begin(uint8_t* mac_address)
 ```
+
 Initialize with MAC address using DHCP. Returns 1 if successful, 0 if DHCP failed.
 
 ##### Static IP Initialization
+
 ```cpp
 void begin(uint8_t* mac_address, IPAddress local_ip)
 void begin(uint8_t* mac_address, IPAddress local_ip, IPAddress dns_server)
 void begin(uint8_t* mac_address, IPAddress local_ip, IPAddress dns_server, IPAddress gateway)
 void begin(uint8_t* mac_address, IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet)
 ```
+
 Initialize with static network configuration. Auto-configures missing parameters.
 
 ##### WIZ550io Initialization (when WIZ550io_WITH_MACADDRESS is defined)
+
 ```cpp
 int begin(void)
 void begin(IPAddress local_ip)
@@ -37,6 +44,7 @@ void begin(IPAddress local_ip, IPAddress dns_server)
 void begin(IPAddress local_ip, IPAddress dns_server, IPAddress gateway)
 void begin(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet)
 ```
+
 Initialize using WIZ550io's built-in MAC address.
 
 #### Network Management
@@ -44,12 +52,14 @@ Initialize using WIZ550io's built-in MAC address.
 ```cpp
 int maintain()
 ```
+
 Maintain DHCP lease. Call regularly in loop(). Returns DHCP status codes:
-- `DHCP_CHECK_NONE`: No action taken
-- `DHCP_CHECK_RENEW_OK`: Lease renewed successfully
-- `DHCP_CHECK_REBIND_OK`: Lease rebound successfully
-- `DHCP_CHECK_RENEW_FAIL`: Lease renewal failed
-- `DHCP_CHECK_REBIND_FAIL`: Lease rebinding failed
+
+-   `DHCP_CHECK_NONE`: No action taken
+-   `DHCP_CHECK_RENEW_OK`: Lease renewed successfully
+-   `DHCP_CHECK_REBIND_OK`: Lease rebound successfully
+-   `DHCP_CHECK_RENEW_FAIL`: Lease renewal failed
+-   `DHCP_CHECK_REBIND_FAIL`: Lease rebinding failed
 
 #### Network Information
 
@@ -67,6 +77,7 @@ char* hostName()           // Get host name (from DHCP)
 TCP client class for establishing outbound connections.
 
 #### Constructor
+
 ```cpp
 EthernetClient(EthernetClass* eth, EthernetChip* chip)
 EthernetClient(EthernetClass* eth, EthernetChip* chip, uint8_t sock)
@@ -78,6 +89,7 @@ EthernetClient(EthernetClass* eth, EthernetChip* chip, uint8_t sock)
 int connect(IPAddress ip, uint16_t port)
 int connect(const char* host, uint16_t port)
 ```
+
 Establish TCP connection. Returns 1 if successful, 0 if failed.
 
 #### Data Methods
@@ -111,6 +123,7 @@ operator bool()           // Boolean conversion
 TCP server class for accepting incoming connections.
 
 #### Constructor
+
 ```cpp
 EthernetServer(EthernetClass* eth, EthernetChip* chip, uint16_t port)
 ```
@@ -129,6 +142,7 @@ size_t write(const uint8_t* buf, size_t size)  // Broadcast to all clients
 UDP communication class with multicast support.
 
 #### Constructor
+
 ```cpp
 EthernetUDP(EthernetClass* eth, EthernetChip* chip)
 ```
@@ -185,6 +199,7 @@ bool isMulticastGroup(IPAddress ip)                            // Check if IP is
 Abstract interface for WIZnet chip implementations.
 
 #### Key Methods
+
 ```cpp
 bool init()                                    // Initialize chip
 bool linkActive()                              // Check physical link
@@ -194,6 +209,7 @@ uint8_t getCSPin()                             // Get chip select pin
 ```
 
 #### Network Configuration
+
 ```cpp
 void setGatewayIp(uint8_t* addr)              // Set gateway IP
 void getGatewayIp(uint8_t* addr)              // Get gateway IP
@@ -210,14 +226,16 @@ void getIPAddress(uint8_t* addr)              // Get IP address
 Concrete implementation for W5500 chips.
 
 #### Constructor
+
 ```cpp
 W5500(uint8_t cs_pin)
 ```
 
 #### W5500-Specific Features
-- Enhanced SPI performance
-- Improved socket buffer management
-- Advanced PHY configuration options
+
+-   Enhanced SPI performance
+-   Improved socket buffer management
+-   Advanced PHY configuration options
 
 ## DHCP Classes
 
@@ -226,6 +244,7 @@ W5500(uint8_t cs_pin)
 DHCP client implementation for automatic network configuration.
 
 #### Key Methods
+
 ```cpp
 int beginWithDHCP(uint8_t* mac, unsigned long timeout = 60000, unsigned long responseTimeout = 5000)
 int checkLease()                              // Check and maintain lease
@@ -245,11 +264,13 @@ char* getHostName()                           // Get host name
 DNS resolution client for hostname-to-IP conversion.
 
 #### Constructor
+
 ```cpp
 DNSClient(EthernetClass* eth, EthernetChip* chip)
 ```
 
 #### Methods
+
 ```cpp
 void begin(IPAddress dns_server)              // Set DNS server
 int getHostByName(const char* hostname, IPAddress& result)  // Resolve hostname
@@ -273,49 +294,46 @@ uint16_t recvfrom(EthernetChip* chip, SOCKET s, uint8_t* buf, uint16_t len, uint
 void flush(EthernetChip* chip, SOCKET s)
 ```
 
-### Network Utility Macros (in chips/utility/util.h)
-
-```c
-#define htons(x)  // Host to network short (16-bit)
-#define ntohs(x)  // Network to host short (16-bit)
-#define htonl(x)  // Host to network long (32-bit)
-#define ntohl(x)  // Network to host long (32-bit)
-```
-
 ## Constants and Enumerations
 
 ### Socket States (SnSR)
-- `SnSR::CLOSED`: Socket is closed
-- `SnSR::INIT`: Socket is initialized
-- `SnSR::LISTEN`: Socket is listening (TCP server)
-- `SnSR::ESTABLISHED`: TCP connection established
-- `SnSR::CLOSE_WAIT`: Connection closing (peer initiated)
-- `SnSR::FIN_WAIT`: Connection closing (local initiated)
+
+-   `SnSR::CLOSED`: Socket is closed
+-   `SnSR::INIT`: Socket is initialized
+-   `SnSR::LISTEN`: Socket is listening (TCP server)
+-   `SnSR::ESTABLISHED`: TCP connection established
+-   `SnSR::CLOSE_WAIT`: Connection closing (peer initiated)
+-   `SnSR::FIN_WAIT`: Connection closing (local initiated)
 
 ### Socket Modes (SnMR)
-- `SnMR::CLOSE`: Close socket
-- `SnMR::TCP`: TCP mode
-- `SnMR::UDP`: UDP mode
-- `SnMR::IPRAW`: IP raw mode
-- `SnMR::MACRAW`: MAC raw mode
-- `SnMR::PPPOE`: PPPoE mode
+
+-   `SnMR::CLOSE`: Close socket
+-   `SnMR::TCP`: TCP mode
+-   `SnMR::UDP`: UDP mode
+-   `SnMR::IPRAW`: IP raw mode
+-   `SnMR::MACRAW`: MAC raw mode
+-   `SnMR::PPPOE`: PPPoE mode
 
 ### DHCP Status Codes
-- `DHCP_CHECK_NONE`: No DHCP action
-- `DHCP_CHECK_RENEW_OK`: Lease renewed successfully
-- `DHCP_CHECK_RENEW_FAIL`: Lease renewal failed
-- `DHCP_CHECK_REBIND_OK`: Lease rebound successfully
-- `DHCP_CHECK_REBIND_FAIL`: Lease rebinding failed
+
+-   `DHCP_CHECK_NONE`: No DHCP action
+-   `DHCP_CHECK_RENEW_OK`: Lease renewed successfully
+-   `DHCP_CHECK_RENEW_FAIL`: Lease renewal failed
+-   `DHCP_CHECK_REBIND_OK`: Lease rebound successfully
+-   `DHCP_CHECK_REBIND_FAIL`: Lease rebinding failed
 
 ## Error Handling
 
 ### Common Return Values
-- `1` or `true`: Success
-- `0` or `false`: Failure or no data available
-- `-1`: Error condition or no data available (for read operations)
+
+-   `1` or `true`: Success
+-   `0` or `false`: Failure or no data available
+-   `-1`: Error condition or no data available (for read operations)
 
 ### Connection States
+
 Use `EthernetClient::status()` to get detailed socket state information for debugging connection issues.
 
 ### DHCP Troubleshooting
+
 Monitor `EthernetClass::maintain()` return values to detect and handle DHCP lease issues proactively.
