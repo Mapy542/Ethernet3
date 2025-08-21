@@ -45,7 +45,7 @@ void HTTPServer::handleClient() {
 }
 
 void HTTPServer::on(const String& method, const String& path, RequestHandler handler) {
-    if (_routeCount < 10) {
+    if (_routeCount < HTTP_MAX_ROUTES) {
         _routes[_routeCount].method = method;
         _routes[_routeCount].path = path;
         _routes[_routeCount].handler = handler;

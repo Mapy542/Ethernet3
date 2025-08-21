@@ -1,7 +1,7 @@
 #include "HTTPClient.h"
 
 HTTPClient::HTTPClient(EthernetClass* eth, EthernetChip* chip) 
-    : _client(eth, chip), _userAgent("Arduino-Ethernet3/1.0"), _timeout(5000) {
+    : _client(eth, chip), _userAgent("Arduino-Ethernet3/1.0"), _timeout(HTTP_DEFAULT_TIMEOUT) {
 }
 
 void HTTPClient::setUserAgent(const String& userAgent) {

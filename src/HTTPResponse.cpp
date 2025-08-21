@@ -34,7 +34,7 @@ void HTTPResponse::setBody(const String& body) {
 }
 
 void HTTPResponse::addHeader(const String& name, const String& value) {
-    if (_headerCount < 10) {
+    if (_headerCount < HTTP_MAX_HEADERS) {
         _headers[_headerCount] = name + ": " + value;
         _headerCount++;
     }
@@ -116,7 +116,7 @@ bool HTTPResponse::parseFromString(const String& responseString) {
     _headerCount = 0;
     int currentPos = firstLineEnd + 1;
     
-    while (currentPos < responseString.length() && _headerCount < 10) {
+    while (currentPos < responseString.length() && _headerCount < HTTP_MAX_HEADERS) {
         int lineEnd = responseString.indexOf('\n', currentPos);
         if (lineEnd == -1) lineEnd = responseString.length();
         

@@ -6,6 +6,7 @@
 #include "EthernetClient.h"
 #include "HTTPRequest.h"
 #include "HTTPResponse.h"
+#include "HTTPConfig.h"
 
 // Forward declaration for request handler function type
 typedef HTTPResponse (*RequestHandler)(const HTTPRequest& request);
@@ -19,7 +20,7 @@ struct Route {
 class HTTPServer {
 private:
     EthernetServer _server;
-    Route _routes[10];  // Support up to 10 routes
+    Route _routes[HTTP_MAX_ROUTES];  // Support for configurable routes
     uint8_t _routeCount;
     RequestHandler _defaultHandler;
     

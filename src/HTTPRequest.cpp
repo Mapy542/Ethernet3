@@ -24,7 +24,7 @@ void HTTPRequest::setBody(const String& body) {
 }
 
 void HTTPRequest::addHeader(const String& name, const String& value) {
-    if (_headerCount < 10) {
+    if (_headerCount < HTTP_MAX_HEADERS) {
         _headers[_headerCount] = name + ": " + value;
         _headerCount++;
     }
@@ -99,7 +99,7 @@ bool HTTPRequest::parseFromString(const String& requestString) {
     _headerCount = 0;
     int currentPos = firstLineEnd + 1;
     
-    while (currentPos < requestString.length() && _headerCount < 10) {
+    while (currentPos < requestString.length() && _headerCount < HTTP_MAX_HEADERS) {
         int lineEnd = requestString.indexOf('\n', currentPos);
         if (lineEnd == -1) lineEnd = requestString.length();
         

@@ -5,6 +5,7 @@
 #include "EthernetClient.h"
 #include "HTTPRequest.h"
 #include "HTTPResponse.h"
+#include "HTTPConfig.h"
 #include "IPAddress.h"
 
 class HTTPClient {

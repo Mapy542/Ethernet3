@@ -2,13 +2,14 @@
 #define HTTPRESPONSE_H
 
 #include "Arduino.h"
+#include "HTTPConfig.h"
 
 class HTTPResponse {
 private:
     String _protocol;
     int _statusCode;
     String _statusMessage;
-    String _headers[10];  // Support for up to 10 headers
+    String _headers[HTTP_MAX_HEADERS];  // Support for configurable headers
     uint8_t _headerCount;
     String _body;
     

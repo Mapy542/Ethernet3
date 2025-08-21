@@ -2,13 +2,14 @@
 #define HTTPREQUEST_H
 
 #include "Arduino.h"
+#include "HTTPConfig.h"
 
 class HTTPRequest {
 private:
     String _method;
     String _path;
     String _protocol;
-    String _headers[10];  // Support for up to 10 headers
+    String _headers[HTTP_MAX_HEADERS];  // Support for configurable headers
     uint8_t _headerCount;
     String _body;
     
