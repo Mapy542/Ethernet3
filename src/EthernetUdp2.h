@@ -44,10 +44,14 @@
 
 #include <Udp.h>
 
-#define UDP_TX_PACKET_MAX_SIZE 24
+#include "Dns.h"
+#include "Ethernet3.h"
+#include "chips/EthernetChip.h"
+#include "chips/utility/socket.h"
 
 class EthernetUDP : public UDP {
    private:
+    EthernetChip* _chip;   // Pointer to the Ethernet chip interface
     uint8_t _sock;         // socket ID for Wiz5100
     uint16_t _port;        // local port to listen on
     IPAddress _remoteIP;   // remote IP address for the incoming packet whilst it's being processed
@@ -56,10 +60,11 @@ class EthernetUDP : public UDP {
     uint16_t _remaining;   // remaining bytes of incoming packet yet to be processed
 
    public:
-    EthernetUDP();                    // Constructor
-    virtual uint8_t begin(uint16_t);  // initialize, start listening on specified port. Returns 1 if
-                                      // successful, 0 if there are no sockets available to use
-    virtual void stop();              // Finish with the UDP socket
+    EthernetUDP(EthernetChip* chip);  // Constructor
+    virtual uint8_t begin(
+        uint16_t port);   // initialize, start listening on specified port. Returns 1 if
+                          // successful, 0 if there are no sockets available to use
+    virtual void stop();  // Finish with the UDP socket
 
     // Sending UDP packets
 

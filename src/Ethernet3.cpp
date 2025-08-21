@@ -75,7 +75,7 @@ int EthernetClass::begin(uint8_t *mac_address) {
     if (_dhcp != NULL) {
         delete _dhcp;
     }
-    _dhcp = new DhcpClass();
+    _dhcp = new DhcpClass(_chip);
     // Initialise the basic info
     _chip->init();
     _chip->setMACAddress(mac_address);
