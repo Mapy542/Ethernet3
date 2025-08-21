@@ -19,6 +19,7 @@
  * #include <HTTP.h>
  */
 
+#include "HTTPConfig.h"
 #include "HTTPRequest.h"
 #include "HTTPResponse.h"
 #include "HTTPClient.h"
