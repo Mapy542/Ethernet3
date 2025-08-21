@@ -1,4 +1,4 @@
-#include "neww5500.h"
+#include "w5500.h"
 
 /*
  * Copyright (c) 2010 by WIZnet <support@wiznet.co.kr>
