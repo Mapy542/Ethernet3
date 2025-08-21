@@ -51,22 +51,22 @@
 
 // GP Register Interface Macros (w5500 specific??)
 
-#define __GP_REGISTER8(name, address)                                              \
-    static inline void write##name(uint8_t _data) { write(address, 0x04, _data); } \
-    static inline uint8_t read##name() { return read(address, 0x00); }
+#define __GP_REGISTER8(name, address)                                       \
+    inline void write##name(uint8_t _data) { write(address, 0x04, _data); } \
+    inline uint8_t read##name() { return read(address, 0x00); }
 #define __GP_REGISTER16(name, address)              \
-    static void write##name(uint16_t _data) {       \
+    void write##name(uint16_t _data) {              \
         write(address, 0x04, _data >> 8);           \
         write(address + 1, 0x04, _data & 0xFF);     \
     }                                               \
-    static uint16_t read##name() {                  \
+    uint16_t read##name() {                         \
         uint16_t res = read(address, 0x00);         \
         res = (res << 8) + read(address + 1, 0x00); \
         return res;                                 \
     }
-#define __GP_REGISTER_N(name, address, size)                                                  \
-    static uint16_t write##name(uint8_t* _buff) { return write(address, 0x04, _buff, size); } \
-    static uint16_t read##name(uint8_t* _buff) { return read(address, 0x00, _buff, size); }
+#define __GP_REGISTER_N(name, address, size)                                           \
+    uint16_t write##name(uint8_t* _buff) { return write(address, 0x04, _buff, size); } \
+    uint16_t read##name(uint8_t* _buff) { return read(address, 0x00, _buff, size); }
 
 // GP Register Interface Macro Def ONLY
 
@@ -95,8 +95,6 @@ class EthernetChip {
     const uint16_t RSIZE = 0;
 
     EthernetChip(uint8_t cs_pin) : _cs_pin(cs_pin) {}
-
-    virtual ~EthernetChip() {}
 
     /**
      * Initialize the chip
