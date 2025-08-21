@@ -17,7 +17,6 @@
 
 #define W5100_MAX_SOCK_NUM 4
 #define W5500_MAX_SOCK_NUM 8
-constexpr uint8_t WIZNET_MAX_SOCK_NUM = W5500_MAX_SOCK_NUM;  // Use W5500 max for compatibility
 
 //==============================================================================
 //--- Common Register Addresses ------------------------------------------------
@@ -184,6 +183,17 @@ class SnSR {
     static const uint8_t IPRAW = 0x32;
     static const uint8_t MACRAW = 0x42;
     static const uint8_t PPPOE = 0x5F;
+};
+
+// PHY Configuration Register (W5500 only)
+class W5500PHYCFGR {
+   public:
+    static const uint8_t LNK_ON = 0x01;    // Link ON
+    static const uint8_t SPD_100 = 0x02;   // Speed 100Mbps
+    static const uint8_t DUP_FULL = 0x04;  // Full Duplex
+    static const uint8_t AUTO = 0x08;      // Auto Negotiation
+    static const uint8_t OPMODE = 0x40;    // Operation Mode
+    static const uint8_t RST = 0x80;       // Reset
 };
 
 //==============================================================================
