@@ -8,7 +8,7 @@ jobs:
         strategy:
             matrix:
                 platform: [uno, megaatmega2560]
-                example: [WebClient, DhcpChatServer, WebServer, MulticastReceiver, UDPSendReceive]
+                example: [WebClient, DhcpChatServer, WebServer, MulticastReceiver, UDPSendReceiveString]
                 #exclude:
                 # Exclude resource-intensive examples on smaller platforms
                 #- platform: uno
