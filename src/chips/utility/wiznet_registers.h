@@ -17,6 +17,9 @@
 
 #define W5100_MAX_SOCK_NUM 4
 #define W5500_MAX_SOCK_NUM 8
+#define MAX_SOCK_NUM \
+    W5500_MAX_SOCK_NUM  // Use W5500 max sockets for compatibility  (will use some extra resources
+                        // on W5100)
 
 //==============================================================================
 //--- Common Register Addresses ------------------------------------------------
