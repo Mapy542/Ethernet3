@@ -7,46 +7,50 @@
 
 class W5500 : public EthernetChip {
    protected:
-    virtual uint8_t readSn(uint8_t _s, uint16_t _addr) override;
-    virtual uint8_t writeSn(uint8_t _s, uint16_t _addr, uint8_t _data) override;
-    virtual uint16_t readSn(uint8_t _s, uint16_t _addr, uint8_t* _buf, uint16_t len) override;
-    virtual uint16_t writeSn(uint8_t _s, uint16_t _addr, uint8_t* _buf, uint16_t len) override;
-
-    virtual uint8_t write(uint16_t _addr, uint8_t _cb, uint8_t _data) override;
-    virtual uint16_t write(uint16_t _addr, uint8_t _cb, const uint8_t* buf, uint16_t len) override;
-    virtual uint8_t read(uint16_t _addr, uint8_t _cb) override;
-    virtual uint16_t read(uint16_t _addr, uint8_t _cb, uint8_t* buf, uint16_t len) override;
-
-    virtual void execCmdSn(uint8_t sock, SockCMD _cmd) override;
+    SPISettings wiznet_SPI_settings;
 
    public:
     const uint16_t SSIZE = 2048;
     const uint16_t RSIZE = 2048;
 
-    W5500(uint8_t cs_pin) : EthernetChip(cs_pin) {}
+    W5500(uint8_t cs_pin) : EthernetChip(cs_pin) {
+        wiznet_SPI_settings = SPISettings(8000000, MSBFIRST, SPI_MODE0);
+    }
 
     virtual bool init() override;
     virtual bool linkActive() override;
     virtual uint8_t getChipType() override;
     virtual void swReset() override;
 
+    virtual uint8_t readSn(SOCKET _s, uint16_t _addr) override;
+    virtual uint8_t writeSn(SOCKET _s, uint16_t _addr, uint8_t _data) override;
+    virtual uint16_t readSn(SOCKET _s, uint16_t _addr, uint8_t* _buf, uint16_t len) override;
+    virtual uint16_t writeSn(SOCKET _s, uint16_t _addr, uint8_t* _buf, uint16_t len) override;
+
+    virtual uint8_t write(uint16_t _addr, uint8_t _cb, uint8_t _data) override;
+    virtual uint16_t write(uint16_t _addr, uint8_t _cb, const uint8_t* buf, uint16_t len) override;
+    virtual uint8_t read(uint16_t _addr, uint8_t _cb) override;
+    virtual uint16_t read(uint16_t _addr, uint8_t _cb, uint8_t* buf, uint16_t len) override;
+
+    virtual void execCmdSn(SOCKET sock, SockCMD _cmd) override;
+
     // ---------------------------------------------------------------------
     // Common network configuration accessors (must be implemented)
     // ---------------------------------------------------------------------
     /** Set gateway IPv4 address (4 bytes) */
-    virtual void setGatewayIp(const uint8_t* addr) override;
+    virtual void setGatewayIp(uint8_t* addr) override;
     /** Get gateway IPv4 address (4 bytes) */
     virtual void getGatewayIp(uint8_t* addr) override;
     /** Set subnet mask (4 bytes) */
-    virtual void setSubnetMask(const uint8_t* addr) override;
+    virtual void setSubnetMask(uint8_t* addr) override;
     /** Get subnet mask (4 bytes) */
     virtual void getSubnetMask(uint8_t* addr) override;
     /** Set MAC address (6 bytes) */
-    virtual void setMACAddress(const uint8_t* addr) override;
+    virtual void setMACAddress(uint8_t* addr) override;
     /** Get MAC address (6 bytes) */
     virtual void getMACAddress(uint8_t* addr) override;
     /** Set IPv4 address (4 bytes) */
-    virtual void setIPAddress(const uint8_t* addr) override;
+    virtual void setIPAddress(uint8_t* addr) override;
     /** Get IPv4 address (4 bytes) */
     virtual void getIPAddress(uint8_t* addr) override;
     /** Set retransmission timeout (ms units per chip spec) */
@@ -112,20 +116,20 @@ class W5500 : public EthernetChip {
     /** Maximum simultaneous sockets supported by the chip. */
     virtual uint8_t maxSockets() override { return W5500_MAX_SOCK_NUM; }
 
-    virtual uint16_t getTXFreeSize(uint8_t sock) override;
-    virtual uint16_t getRXReceivedSize(uint8_t sock) override;
+    virtual uint16_t getTXFreeSize(SOCKET sock) override;
+    virtual uint16_t getRXReceivedSize(SOCKET sock) override;
 
-    virtual uint8_t readSn(uint8_t _s, uint16_t _addr) override;
-    virtual uint8_t writeSn(uint8_t _s, uint16_t _addr, uint8_t _data) override;
-    virtual uint16_t readSn(uint8_t _s, uint16_t _addr, uint8_t* _buf, uint16_t len) override;
-    virtual uint16_t writeSn(uint8_t _s, uint16_t _addr, uint8_t* _buf, uint16_t len) override;
+    virtual uint8_t readSn(SOCKET _s, uint16_t _addr) override;
+    virtual uint8_t writeSn(SOCKET _s, uint16_t _addr, uint8_t _data) override;
+    virtual uint16_t readSn(SOCKET _s, uint16_t _addr, uint8_t* _buf, uint16_t len) override;
+    virtual uint16_t writeSn(SOCKET _s, uint16_t _addr, uint8_t* _buf, uint16_t len) override;
 
     virtual uint8_t write(uint16_t _addr, uint8_t _cb, uint8_t _data) override;
     virtual uint16_t write(uint16_t _addr, uint8_t _cb, const uint8_t* buf, uint16_t len) override;
     virtual uint8_t read(uint16_t _addr, uint8_t _cb) override;
     virtual uint16_t read(uint16_t _addr, uint8_t _cb, uint8_t* buf, uint16_t len) override;
 
-    virtual void execCmdSn(uint8_t sock, SockCMD _cmd) override;
+    virtual void execCmdSn(SOCKET sock, SockCMD _cmd) override;
 
     __SOCKET_REGISTER8(SnMR, 0x0000)        // Mode
     __SOCKET_REGISTER8(SnCR, 0x0001)        // Command
