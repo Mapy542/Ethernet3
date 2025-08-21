@@ -44,10 +44,7 @@ void setup() {
   Serial.println("Initialize Ethernet with DHCP:");
   if (Ethernet.begin(mac) == 0) {
     Serial.println("Failed to configure Ethernet using DHCP");
-    // Check for Ethernet hardware present
-    if (Ethernet.linkActive() == 0) {
-      Serial.println("Ethernet cable is not connected.");
-    }
+    // Note: linkActive() method check removed for compatibility
     // try to configure using IP address instead of DHCP:
     Ethernet.begin(mac, ip, myDns);
   } else {

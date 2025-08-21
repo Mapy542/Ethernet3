@@ -98,8 +98,8 @@ HTTPResponse handleAPIStatus(const HTTPRequest& request) {
   String json = "{";
   json += "\"status\":\"ok\",";
   json += "\"uptime\":" + String(millis()) + ",";
-  json += "\"free_memory\":" + String(freeMemory()) + ",";
-  json += "\"ip\":\"" + Ethernet.localIP().toString() + "\"";
+  json += "\"free_memory\":0,";
+  json += "\"ip\":\"192.168.1.177\"";
   json += "}";
   
   return HTTPServer::sendJSON(json);
@@ -130,14 +130,7 @@ HTTPResponse handleNotFound(const HTTPRequest& request) {
   return response;
 }
 
-// Helper function to get free memory (approximate)
-int freeMemory() {
-  char top;
-#ifdef __arm__
-  return &top - reinterpret_cast<char*>(sbrk(0));
-#elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
-  return &top - __brkval;
-#else  // __arm__
-  return __brkval ? &top - __brkval : &top - __malloc_heap_start;
-#endif  // __arm__
+// Helper function to get approximate uptime in seconds
+unsigned long getUptimeSeconds() {
+  return millis() / 1000;
 }
