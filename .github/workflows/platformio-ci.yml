@@ -8,12 +8,19 @@ jobs:
         strategy:
             matrix:
                 platform: [uno, megaatmega2560]
-                example: [WebClient, DhcpChatServer, WebServer, MulticastReceiver, UDPSendReceiveString, HTTPServer]
+                example:
+                    [
+                        WebClient,
+                        DhcpChatServer,
+                        WebServer,
+                        MulticastReceiver,
+                        UDPSendReceiveString,
+                        HTTPServer
+                    ]
                 exclude:
                     # Exclude resource-intensive examples on smaller platforms
                     - platform: uno
                       example: HTTPServer
-
 
         steps:
             - uses: actions/checkout@v4
