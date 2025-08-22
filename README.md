@@ -31,84 +31,14 @@ The Ethernet3 library is an enhanced Arduino Ethernet library designed to provid
 -   **TCP Client**: Full-featured TCP client with DNS resolution
 -   **TCP Server**: Multi-client TCP server with broadcasting capabilities
 -   **UDP Communication**: Complete UDP implementation with multicast support
+-   **HTTP Client**: High-level HTTP client with support for GET, POST, PUT, DELETE methods
+-   **HTTP Server**: HTTP server with routing system for web interfaces and REST APIs
 -   **DHCP Client**: Automatic network configuration with lease management
 -   **DNS Client**: Hostname resolution for both TCP and UDP connections
-
-### Enhanced Functionality
-
--   **Abstract Chip Interface**: Support for multiple WIZnet chip types (W5100, W5500, etc.)
--   **Multicast UDP**: Join/leave multicast groups with automatic MAC address calculation
--   **Improved Error Handling**: Better connection state management and error reporting
--   **Enhanced DHCP**: Automatic lease renewal and rebinding with detailed status reporting
--   **Socket Management**: Intelligent socket allocation and reuse
 
 ### Hardware Abstraction
 
 -   **Multiple Chip Support**: W5100, W5500, and future WIZnet chips
-
-## Key Differences from Standard Arduino Ethernet
-
-### Architecture Improvements
-
-#### 1. Abstract Chip Interface
-
-**Standard Arduino Ethernet**:
-
--   Hard-coded for W5(5/1)00 chip
--   Direct register access throughout code
-
-**Ethernet3 Library**:
-
--   Abstract `EthernetChip` interface
--   Pluggable chip implementations (W5500, W5100, etc.)
--   Easy to extend for future chip types
-
-```cpp
-// Standard Arduino Ethernet (singleton, W5100 only)
-Ethernet.begin(mac);
-
-// Ethernet3 (flexible, multiple chip support)
-W5500 chip(10);  // CS pin 10
-EthernetClass ethernet(&chip);
-ethernet.begin(mac);
-```
-
-#### 2. Non-Singleton Design
-
-**Standard Arduino Ethernet**:
-
--   Global singleton `Ethernet` object
--   Single instance per application
--   Difficult to manage multiple interfaces
-
-**Ethernet3 Library**:
-
--   Multiple instances supported
--   Better resource management
--   More flexible application architectures
-
-### Functional Enhancements
-
-#### 1. Multicast UDP Support
-
-**Standard Arduino Ethernet**:
-
--   Basic UDP unicast only
--   No multicast group management
--   Limited broadcast capabilities
-
-**Ethernet3 Library**:
-
--   Full multicast group support
--   Automatic multicast MAC calculation
--   Join/leave multicast groups dynamically
-
-```cpp
-// Ethernet3 multicast example
-EthernetUDP udp(&ethernet, &chip);
-udp.beginMulticast(IPAddress(224, 1, 1, 1), 1234);
-udp.joinMulticastGroup(IPAddress(224, 2, 2, 2));
-```
 
 ## Supported Hardware
 
@@ -150,6 +80,7 @@ See examples for usage patterns.
 
 ## Next Steps
 
--   Review the [API Reference](api-reference.md) for detailed function documentation
--   See the [Migration Guide](migration-guide.md) for porting existing code
+-   Review the [API Reference](docs/api-reference.md) for detailed function documentation
+-   See the [HTTP Implementation Guide](docs/http-guide.md) for HTTP client and server usage
+-   See the [Migration Guide](docs/migration-guide.md) for porting existing code
 -   Browse [Examples](examples/) for practical usage patterns
