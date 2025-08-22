@@ -6,27 +6,27 @@ This guide provides comprehensive information about the HTTP protocol implementa
 
 The HTTP implementation provides a high-level interface for HTTP communication while leveraging the existing proven TCP stack in Ethernet3. It consists of four main classes that work together to provide both client and server HTTP functionality:
 
-- **HTTPRequest**: Represents and parses HTTP requests
-- **HTTPResponse**: Represents and builds HTTP responses  
-- **HTTPClient**: Provides HTTP client functionality
-- **HTTPServer**: Provides HTTP server functionality with routing
+-   **HTTPRequest**: Represents and parses HTTP requests
+-   **HTTPResponse**: Represents and builds HTTP responses
+-   **HTTPClient**: Provides HTTP client functionality
+-   **HTTPServer**: Provides HTTP server functionality with routing
 
 ## Design Principles
 
-- **Built on existing proven TCP implementation** - Leverages the tested and reliable TCP socket functionality
-- **Maintains full backward compatibility** - Existing TCP/UDP code continues to work unchanged
-- **Memory-conscious design for Arduino constraints** - Configurable limits to fit available memory
-- **Simple, intuitive API** - Easy-to-use interface similar to popular HTTP libraries
-- **Configurable memory limits** - Adjust memory usage based on your project's needs
+-   **Built on existing proven TCP implementation** - Leverages the tested and reliable TCP socket functionality
+-   **Maintains full backward compatibility** - Existing TCP/UDP code continues to work unchanged
+-   **Memory-conscious design for Arduino constraints** - Configurable limits to fit available memory
+-   **Simple, intuitive API** - Easy-to-use interface similar to popular HTTP libraries
+-   **Configurable memory limits** - Adjust memory usage based on your project's needs
 
 ## Architecture
 
 The HTTP implementation leverages the existing Ethernet3 architecture:
 
-- **HTTPClient** wraps `EthernetClient` for HTTP request functionality
-- **HTTPServer** wraps `EthernetServer` to provide HTTP response handling
-- Both classes maintain the same constructor patterns as existing Ethernet classes
-- All HTTP functionality is built on top of the proven TCP socket implementation
+-   **HTTPClient** wraps `EthernetClient` for HTTP request functionality
+-   **HTTPServer** wraps `EthernetServer` to provide HTTP response handling
+-   Both classes maintain the same constructor patterns as existing Ethernet classes
+-   All HTTP functionality is built on top of the proven TCP socket implementation
 
 ## Memory Management
 
@@ -43,10 +43,10 @@ The implementation is designed for Arduino memory constraints with configurable 
 
 ### Typical Memory Usage
 
-- **HTTPClient**: ~200 bytes + dynamic strings
-- **HTTPServer**: ~300 bytes + routes + dynamic strings  
-- **HTTPRequest**: ~100 bytes + headers + body
-- **HTTPResponse**: ~100 bytes + headers + body
+-   **HTTPClient**: ~200 bytes + dynamic strings
+-   **HTTPServer**: ~300 bytes + routes + dynamic strings
+-   **HTTPRequest**: ~100 bytes + headers + body
+-   **HTTPResponse**: ~100 bytes + headers + body
 
 String usage is the main memory consumer - consider using shorter strings in production on memory-constrained devices.
 
@@ -83,7 +83,7 @@ void setup() {
 void loop() {
     // Simple URL-based request
     HTTPResponse response = client.request("GET", "http://example.com/api/data");
-    
+
     if (response.getStatusCode() == 200) {
         Serial.println("Success!");
         Serial.println(response.getBody());
@@ -91,7 +91,7 @@ void loop() {
         Serial.print("Error: ");
         Serial.println(response.getStatusCode());
     }
-    
+
     delay(5000);
 }
 ```
@@ -106,7 +106,7 @@ void multipleRequests() {
         HTTPResponse resp1 = client.GET("/endpoint1");
         HTTPResponse resp2 = client.POST("/endpoint2", "{\"key\":\"value\"}", "application/json");
         HTTPResponse resp3 = client.PUT("/endpoint3", "updated data", "text/plain");
-        
+
         client.disconnect();
     }
 }
@@ -159,12 +159,12 @@ void setup() {
     // Initialize network
     uint8_t mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
     ethernet.begin(mac);
-    
+
     // Set up routes
     server.onGET("/", handleRoot);
     server.onGET("/api/status", handleAPI);
     server.onNotFound(handle404);
-    
+
     server.begin();
     Serial.println("HTTP server started");
 }
@@ -198,17 +198,17 @@ HTTPResponse handleConfigUpdate(const HTTPRequest& request) {
     if (request.getMethod() != "POST") {
         return HTTPServer::sendError(405, "Method not allowed");
     }
-    
+
     // Access headers
     String contentType = request.getHeader("Content-Type");
     if (contentType != "application/json") {
         return HTTPServer::sendError(400, "JSON required");
     }
-    
+
     // Process request body
     String body = request.getBody();
     // Parse JSON, update configuration, etc.
-    
+
     // Return success response
     HTTPResponse response = HTTPServer::sendJSON("{\"result\":\"success\"}");
     response.setHeader("Location", "/api/config");
@@ -216,102 +216,14 @@ HTTPResponse handleConfigUpdate(const HTTPRequest& request) {
 }
 ```
 
-## Common Usage Patterns
-
-### RESTful API Client
-
-```cpp
-class APIClient {
-private:
-    HTTPClient& client;
-    String baseURL;
-    
-public:
-    APIClient(HTTPClient& httpClient, String url) : client(httpClient), baseURL(url) {}
-    
-    HTTPResponse getUser(int userId) {
-        String url = baseURL + "/users/" + String(userId);
-        return client.GET(url);
-    }
-    
-    HTTPResponse createUser(String userData) {
-        String url = baseURL + "/users";
-        return client.POST(url, userData, "application/json");
-    }
-    
-    HTTPResponse updateUser(int userId, String userData) {
-        String url = baseURL + "/users/" + String(userId);
-        return client.PUT(url, userData, "application/json");
-    }
-    
-    HTTPResponse deleteUser(int userId) {
-        String url = baseURL + "/users/" + String(userId);
-        return client.DELETE(url);
-    }
-};
-```
-
-### IoT Device Web Interface
-
-```cpp
-HTTPResponse handleDeviceStatus(const HTTPRequest& request) {
-    String html = "<!DOCTYPE html><html><head><title>Device Status</title></head><body>";
-    html += "<h1>Arduino Device Status</h1>";
-    html += "<p>Uptime: " + String(millis() / 1000) + " seconds</p>";
-    html += "<p>Free Memory: " + String(freeMemory()) + " bytes</p>";
-    html += "<p>Temperature: " + String(readTemperature()) + " °C</p>";
-    html += "</body></html>";
-    
-    return HTTPServer::sendHTML(html);
-}
-
-HTTPResponse handleSensorData(const HTTPRequest& request) {
-    String json = "{";
-    json += "\"temperature\":" + String(readTemperature()) + ",";
-    json += "\"humidity\":" + String(readHumidity()) + ",";
-    json += "\"timestamp\":" + String(millis());
-    json += "}";
-    
-    HTTPResponse response = HTTPServer::sendJSON(json);
-    response.setHeader("Access-Control-Allow-Origin", "*"); // CORS for web apps
-    return response;
-}
-```
-
-## Configuration Options
-
-### Timeout Settings
-
-```cpp
-// Set custom timeout for slow servers
-client.setTimeout(10000); // 10 second timeout
-
-// Check current timeout
-unsigned long timeout = client.getTimeout();
-```
-
-### Custom Headers
-
-```cpp
-// Client request with custom headers
-HTTPResponse response = client.GET("/api/data");
-// Headers are automatically managed, but you can access them in responses
-
-// Server response with custom headers
-HTTPResponse response = HTTPServer::sendJSON(data);
-response.setHeader("Cache-Control", "no-cache");
-response.setHeader("Access-Control-Allow-Origin", "*");
-return response;
-```
-
 ## Limitations and Considerations
 
 ### Current Limitations
 
-- **HTTP only** - No HTTPS/TLS support
-- **Basic header parsing** - No advanced HTTP features like chunked encoding
-- **Memory-constrained parsing** - Suitable for Arduino but limited compared to full HTTP libraries
-- **Limited concurrent connections** - Inherited from underlying TCP layer
+-   **HTTP only** - No HTTPS/TLS support
+-   **Basic header parsing** - No advanced HTTP features like chunked encoding
+-   **Memory-constrained parsing** - Suitable for Arduino but limited compared to full HTTP libraries
+-   **Limited concurrent connections** - Inherited from underlying TCP layer
 
 ### Best Practices
 
@@ -323,11 +235,11 @@ return response;
 
 ### Performance Tips
 
-- Use connection reuse for multiple requests to the same server
-- Keep request/response bodies small
-- Limit the number of HTTP headers
-- Consider using shorter URLs and paths
-- Monitor and limit the number of concurrent server connections
+-   Use connection reuse for multiple requests to the same server
+-   Keep request/response bodies small
+-   Limit the number of HTTP headers
+-   Consider using shorter URLs and paths
+-   Monitor and limit the number of concurrent server connections
 
 ## Troubleshooting
 
@@ -364,9 +276,9 @@ void debugResponse(const HTTPResponse& response) {
 
 Complete examples are available in the `examples/` directory:
 
-- **HTTPClient/** - Complete HTTP client usage example
-- **HTTPServer/** - Complete HTTP server with routing example  
-- **HTTPBasicTest/** - Basic compilation and functionality test
+-   **HTTPClient/** - Complete HTTP client usage example
+-   **HTTPServer/** - Complete HTTP server with routing example
+-   **HTTPBasicTest/** - Basic compilation and functionality test
 
 These examples demonstrate real-world usage patterns and can serve as starting points for your projects.
 
@@ -374,9 +286,9 @@ These examples demonstrate real-world usage patterns and can serve as starting p
 
 This HTTP implementation maintains 100% backward compatibility with existing Ethernet3 functionality:
 
-- Existing TCP/UDP code continues to work unchanged
-- No modifications to existing Ethernet3 classes
-- HTTP functionality is completely optional
-- Same chip support (W5100, W5500, etc.)
+-   Existing TCP/UDP code continues to work unchanged
+-   No modifications to existing Ethernet3 classes
+-   HTTP functionality is completely optional
+-   Same chip support (W5100, W5500, etc.)
 
 The HTTP implementation provides a solid foundation for IoT projects, web-based device control, RESTful APIs, and other HTTP-based communication needs while maintaining the reliability and performance of the existing Ethernet3 TCP stack.
