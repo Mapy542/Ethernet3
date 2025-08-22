@@ -76,10 +76,8 @@ jobs:
                   sed -i "s/version=.*/version=$VERSION/" library.properties
 
             - name: Login to PlatformIO
-              env:
-                  PLATFORMIO_AUTH_TOKEN: ${{ secrets.PLATFORMIO_AUTH_TOKEN }}
               run: |
-                  echo "$PLATFORMIO_AUTH_TOKEN" | pio account login --username "${{ secrets.PLATFORMIO_USERNAME }}" --password - || true
+                  pio account login --username "${{ secrets.PLATFORMIO_USERNAME }}" --password "${{ secrets.PLATFORMIO_PASSWORD }}"
 
             - name: Package Library
               run: |
@@ -88,7 +86,7 @@ jobs:
 
             - name: Publish to Registry
               run: |
-                  pio package publish ./dist/*.tar.gz
+                  pio package publish ./dist/*.tar.gz --no-interactive
 
             - name: Upload Release Assets
               uses: actions/upload-release-asset@v1
