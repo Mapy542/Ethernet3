@@ -1,7 +1,7 @@
 /**
  * @file EthernetServer.h
  * @brief TCP server implementation for Ethernet3 library
- * 
+ *
  * This file provides the EthernetServer class which implements a TCP server
  * that can listen for incoming connections and accept multiple simultaneous
  * client connections.
@@ -20,22 +20,25 @@ class EthernetClient;
 
 /**
  * @brief TCP server class for accepting incoming network connections
- * 
+ *
  * EthernetServer provides a TCP server implementation that can bind to a
  * specific port and accept incoming client connections. It's compatible with
  * the standard Arduino Server interface while providing enhanced functionality.
- * 
+ *
  * Key features:
  * - Support for multiple simultaneous client connections
  * - Automatic socket management and reuse
  * - Enhanced connection handling and error recovery
  * - Compatible with standard Arduino Server interface
- * 
+ *
  * Unlike the standard Arduino Ethernet library, this implementation:
  * - Uses an abstract chip interface for better hardware abstraction
  * - Provides better socket reuse and connection state management
  * - Supports more reliable multi-client handling
  */
+
+// TODO: Implement support for different "server" class provided by esp32 frameworks. Then library
+// will be compatible with esp32 Arduino framework.
 class EthernetServer : public Server {
    private:
     EthernetClass* _ethernet;  ///< Pointer to the Ethernet class instance
@@ -44,7 +47,7 @@ class EthernetServer : public Server {
 
     /**
      * @brief Accept pending connections on listening sockets
-     * 
+     *
      * Internal function that checks all sockets for incoming connections
      * and transitions them from LISTEN to ESTABLISHED state when clients connect.
      */
@@ -56,51 +59,52 @@ class EthernetServer : public Server {
      * @param eth Pointer to EthernetClass instance
      * @param chip Pointer to EthernetChip interface
      * @param port Port number to listen on
-     * 
+     *
      * Creates a server that will listen on the specified port for incoming
      * TCP connections.
      */
     EthernetServer(EthernetClass* eth, EthernetChip* chip, uint16_t port);
-    
+
     /**
      * @brief Get an available client connection
-     * @return EthernetClient object representing a connected client, or invalid client if none available
-     * 
+     * @return EthernetClient object representing a connected client, or invalid client if none
+     * available
+     *
      * Checks for clients with data available or newly connected clients.
      * Returns an EthernetClient object that can be used to communicate with the client.
      * If no clients are available, returns an invalid client (evaluates to false).
      */
     EthernetClient available();
-    
+
     /**
      * @brief Start listening for incoming connections
-     * 
+     *
      * Initializes the server to listen for incoming connections on the specified port.
      * Multiple sockets may be allocated to support simultaneous connections.
      */
     virtual void begin();
-    
+
     /**
      * @brief Write a single byte to all connected clients
      * @param byte Byte to write
      * @return Number of bytes written
-     * 
+     *
      * Sends a single byte to all currently connected clients.
      * Useful for broadcasting data to multiple clients simultaneously.
      */
     virtual size_t write(uint8_t byte);
-    
+
     /**
      * @brief Write multiple bytes to all connected clients
      * @param buf Buffer containing data to write
      * @param size Number of bytes to write
      * @return Number of bytes written
-     * 
+     *
      * Sends the specified data to all currently connected clients.
      * Useful for broadcasting data to multiple clients simultaneously.
      */
     virtual size_t write(const uint8_t* buf, size_t size);
-    
+
     /**
      * @brief Inherit write functions from Print class
      */
