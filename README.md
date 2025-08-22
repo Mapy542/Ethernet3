@@ -31,6 +31,8 @@ The Ethernet3 library is an enhanced Arduino Ethernet library designed to provid
 -   **TCP Client**: Full-featured TCP client with DNS resolution
 -   **TCP Server**: Multi-client TCP server with broadcasting capabilities
 -   **UDP Communication**: Complete UDP implementation with multicast support
+-   **HTTP Client**: High-level HTTP client with support for GET, POST, PUT, DELETE methods
+-   **HTTP Server**: HTTP server with routing system for web interfaces and REST APIs
 -   **DHCP Client**: Automatic network configuration with lease management
 -   **DNS Client**: Hostname resolution for both TCP and UDP connections
 
@@ -150,6 +152,7 @@ See examples for usage patterns.
 
 ## Next Steps
 
--   Review the [API Reference](api-reference.md) for detailed function documentation
--   See the [Migration Guide](migration-guide.md) for porting existing code
+-   Review the [API Reference](docs/api-reference.md) for detailed function documentation
+-   See the [HTTP Implementation Guide](docs/http-guide.md) for HTTP client and server usage
+-   See the [Migration Guide](docs/migration-guide.md) for porting existing code
 -   Browse [Examples](examples/) for practical usage patterns
