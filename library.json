@@ -64,6 +64,16 @@
             "name": "Web Server",
             "base": "examples/WebServer",
             "files": ["WebServer.ino"]
+        },
+        {
+            "name": "Multicast Receiver",
+            "base": "examples/MulticastReceiver",
+            "files": ["MulticastReceiver.ino"]
+        },
+        {
+            "name": "Multicast Sender",
+            "base": "examples/MulticastSender",
+            "files": ["MulticastSender.ino"]
         }
     ]
 }
