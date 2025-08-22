@@ -286,6 +286,265 @@ int leaveMulticastGroup(IPAddress group_ip)                    // Leave group
 bool isMulticastGroup(IPAddress ip)                            // Check if IP is multicast
 ```
 
+## HTTP Classes
+
+The HTTP implementation provides high-level HTTP client and server functionality built on top of the existing TCP stack. All HTTP classes require an `EthernetClass` instance and chip interface.
+
+### HTTPClient
+
+HTTP client class for making HTTP requests to web servers.
+
+#### Constructor
+
+```cpp
+HTTPClient(EthernetClass* eth, EthernetChip* chip)
+```
+
+Creates an HTTP client using the specified Ethernet interface and chip.
+
+#### Connection Methods
+
+```cpp
+bool connect(const char* host, uint16_t port = 80)
+void disconnect()
+bool connected()
+```
+
+Establish and manage HTTP connections to servers.
+
+#### Request Methods
+
+```cpp
+HTTPResponse request(const String& method, const String& url)
+HTTPResponse request(const String& method, const String& url, const String& body)
+HTTPResponse GET(const String& path)
+HTTPResponse POST(const String& path, const String& body, const String& contentType = "text/plain")
+HTTPResponse PUT(const String& path, const String& body, const String& contentType = "text/plain")
+HTTPResponse DELETE(const String& path)
+```
+
+Send HTTP requests and receive responses. The `request()` method supports full URLs, while specific methods use paths with established connections.
+
+#### Timeout Configuration
+
+```cpp
+void setTimeout(unsigned long timeout)
+unsigned long getTimeout()
+```
+
+Configure request timeout (default: 5000ms).
+
+### HTTPServer
+
+HTTP server class with routing support for handling incoming HTTP requests.
+
+#### Constructor
+
+```cpp
+HTTPServer(EthernetClass* eth, EthernetChip* chip, uint16_t port = 80)
+```
+
+Creates an HTTP server on the specified port.
+
+#### Server Management
+
+```cpp
+void begin()
+void handleClient()
+void close()
+```
+
+Start the server, process incoming requests (call in loop), and stop the server.
+
+#### Route Registration
+
+```cpp
+void onGET(const String& path, HTTPHandler handler)
+void onPOST(const String& path, HTTPHandler handler)
+void onPUT(const String& path, HTTPHandler handler)
+void onDELETE(const String& path, HTTPHandler handler)
+void onNotFound(HTTPHandler handler)
+```
+
+Register handlers for different HTTP methods and paths. Handlers have the signature:
+```cpp
+HTTPResponse handlerFunction(const HTTPRequest& request)
+```
+
+#### Response Helpers
+
+```cpp
+static HTTPResponse sendHTML(const String& html)
+static HTTPResponse sendJSON(const String& json)
+static HTTPResponse sendText(const String& text)
+static HTTPResponse sendError(int statusCode, const String& message = "")
+```
+
+Convenience methods for creating common response types.
+
+### HTTPRequest
+
+Represents an HTTP request with methods for accessing request data.
+
+#### Request Information
+
+```cpp
+String getMethod()          // GET, POST, PUT, DELETE, etc.
+String getPath()            // Request path (e.g., "/api/data")
+String getQuery()           // Query string after '?'
+String getBody()            // Request body content
+String getVersion()         // HTTP version (e.g., "1.1")
+```
+
+#### Header Management
+
+```cpp
+String getHeader(const String& name)
+void setHeader(const String& name, const String& value)
+bool hasHeader(const String& name)
+int getHeaderCount()
+```
+
+Access and modify HTTP headers.
+
+#### URL Parsing
+
+```cpp
+static String parseHost(const String& url)
+static uint16_t parsePort(const String& url)
+static String parsePath(const String& url)
+```
+
+Utility methods for parsing URL components.
+
+### HTTPResponse
+
+Represents an HTTP response with methods for building and accessing response data.
+
+#### Response Information
+
+```cpp
+int getStatusCode()         // HTTP status code (200, 404, etc.)
+String getStatusText()      // Status message ("OK", "Not Found", etc.)
+String getBody()            // Response body content
+String getVersion()         // HTTP version
+```
+
+#### Header Management
+
+```cpp
+String getHeader(const String& name)
+void setHeader(const String& name, const String& value)
+bool hasHeader(const String& name)
+int getHeaderCount()
+```
+
+Access and modify response headers.
+
+#### Response Building
+
+```cpp
+void setStatusCode(int code)
+void setBody(const String& body)
+String toString()           // Generate complete HTTP response
+```
+
+Build HTTP responses for server applications.
+
+#### Status Code Constants
+
+```cpp
+static const int HTTP_OK = 200;
+static const int HTTP_NOT_FOUND = 404;
+static const int HTTP_BAD_REQUEST = 400;
+static const int HTTP_INTERNAL_ERROR = 500;
+// Additional standard HTTP status codes available
+```
+
+### Configuration
+
+HTTP functionality can be configured by modifying `HTTPConfig.h`:
+
+```cpp
+#define HTTP_MAX_HEADERS 8         // Maximum headers per request/response
+#define HTTP_MAX_ROUTES 8          // Maximum server routes
+#define HTTP_MAX_BODY_SIZE 1024    // Maximum body size in bytes
+#define HTTP_DEFAULT_TIMEOUT 5000  // Default timeout in milliseconds
+```
+
+### Memory Considerations
+
+The HTTP implementation is designed for Arduino memory constraints:
+
+- **HTTPClient**: ~200 bytes + dynamic strings
+- **HTTPServer**: ~300 bytes + routes + dynamic strings  
+- **HTTPRequest**: ~100 bytes + headers + body
+- **HTTPResponse**: ~100 bytes + headers + body
+
+String usage is the main memory consumer. Consider using shorter strings in production on memory-constrained devices.
+
+### Example Usage
+
+#### HTTP Client Example
+
+```cpp
+#include <Ethernet3.h>
+#include <HTTP.h>
+
+W5500 chip(10);
+EthernetClass Ethernet(&chip);
+HTTPClient client(&Ethernet, &chip);
+
+void setup() {
+  // Initialize network
+  uint8_t mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
+  Ethernet.begin(mac);
+}
+
+void loop() {
+  // Make HTTP request
+  HTTPResponse response = client.request("GET", "http://example.com/api/data");
+  if (response.getStatusCode() == 200) {
+    Serial.println(response.getBody());
+  }
+  delay(5000);
+}
+```
+
+#### HTTP Server Example
+
+```cpp
+#include <Ethernet3.h>
+#include <HTTP.h>
+
+W5500 chip(10);
+EthernetClass Ethernet(&chip);
+HTTPServer server(&Ethernet, &chip, 80);
+
+HTTPResponse handleRoot(const HTTPRequest& request) {
+  return HTTPServer::sendHTML("<h1>Hello World</h1>");
+}
+
+HTTPResponse handleAPI(const HTTPRequest& request) {
+  return HTTPServer::sendJSON("{\"status\":\"ok\"}");
+}
+
+void setup() {
+  // Initialize network
+  uint8_t mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
+  Ethernet.begin(mac);
+  
+  // Set up routes
+  server.onGET("/", handleRoot);
+  server.onGET("/api", handleAPI);
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();
+}
+```
+
 ## Chip Interface Classes
 
 ### EthernetChip (Abstract Base)

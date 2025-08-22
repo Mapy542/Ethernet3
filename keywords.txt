@@ -11,6 +11,10 @@ EthernetClient	KEYWORD1
 EthernetServer	KEYWORD1
 IPAddress	KEYWORD1
 EthernetUdp2	KEYWORD1
+HTTPClient	KEYWORD1
+HTTPServer	KEYWORD1
+HTTPRequest	KEYWORD1
+HTTPResponse	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -31,6 +35,23 @@ endPacket	KEYWORD2
 parsePacket	KEYWORD2
 remoteIP	KEYWORD2
 remotePort	KEYWORD2
+GET	KEYWORD2
+POST	KEYWORD2
+PUT	KEYWORD2
+DELETE	KEYWORD2
+sendRequest	KEYWORD2
+onGET	KEYWORD2
+onPOST	KEYWORD2
+onPUT	KEYWORD2
+onDELETE	KEYWORD2
+handleClient	KEYWORD2
+getStatusCode	KEYWORD2
+getMethod	KEYWORD2
+getPath	KEYWORD2
+getBody	KEYWORD2
+setHeader	KEYWORD2
+getHeader	KEYWORD2
+toString	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

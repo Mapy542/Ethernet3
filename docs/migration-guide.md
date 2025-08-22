@@ -300,6 +300,104 @@ void loop() {
 }
 ```
 
+## New Features to Consider
+
+Using Ethernet3 opens up opportunities to leverage new features not available in the original Arduino Ethernet library.
+
+### HTTP Protocol Support
+
+Ethernet3 includes comprehensive HTTP client and server functionality built on top of the existing TCP implementation.
+
+#### HTTP Client
+
+Replace manual HTTP request construction with the built-in HTTP client:
+
+**Before (manual HTTP over TCP):**
+
+```cpp
+EthernetClient client;
+if (client.connect("example.com", 80)) {
+    client.println("GET /api/data HTTP/1.1");
+    client.println("Host: example.com");
+    client.println("Connection: close");
+    client.println();
+    
+    // Manual response parsing...
+    while (client.connected()) {
+        if (client.available()) {
+            String line = client.readStringUntil('\r');
+            // Parse headers, status code, body manually
+        }
+    }
+    client.stop();
+}
+```
+
+**After (with HTTP client):**
+
+```cpp
+#include <HTTP.h>
+
+HTTPClient httpClient(&ethernet, &chip);
+HTTPResponse response = httpClient.request("GET", "http://example.com/api/data");
+
+if (response.getStatusCode() == 200) {
+    Serial.println(response.getBody());
+}
+```
+
+#### HTTP Server
+
+Replace manual HTTP response construction with the built-in HTTP server:
+
+**Before (manual HTTP over TCP):**
+
+```cpp
+EthernetServer server(80);
+
+void loop() {
+    EthernetClient client = server.available();
+    if (client) {
+        String request = client.readStringUntil('\r');
+        
+        // Manual request parsing and routing
+        if (request.indexOf("GET / ") >= 0) {
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-Type: text/html");
+            client.println("Connection: close");
+            client.println();
+            client.println("<html><body><h1>Hello</h1></body></html>");
+        }
+        client.stop();
+    }
+}
+```
+
+**After (with HTTP server):**
+
+```cpp
+#include <HTTP.h>
+
+HTTPServer httpServer(&ethernet, &chip, 80);
+
+HTTPResponse handleRoot(const HTTPRequest& request) {
+    return HTTPServer::sendHTML("<html><body><h1>Hello</h1></body></html>");
+}
+
+void setup() {
+    httpServer.onGET("/", handleRoot);
+    httpServer.begin();
+}
+
+void loop() {
+    httpServer.handleClient();
+}
+```
+
+### Enhanced Chip Support
+
+Ethernet3 provides better support for multiple WIZnet chip types with enhanced features and improved performance.
+
 ## Troubleshooting Migration Issues
 
 ### Issue 1: Compilation Errors
