@@ -67,7 +67,11 @@ jobs:
 
             - name: Update Version
               run: |
-                  VERSION=${GITHUB_REF#refs/tags/v}
+                  if [ "${{ github.event_name }}" == "release" ]; then
+                    VERSION=${GITHUB_REF#refs/tags/v}
+                  else
+                    VERSION=${{ github.event.inputs.version }}
+                  fi
                   sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" library.json
                   sed -i "s/version=.*/version=$VERSION/" library.properties
 
