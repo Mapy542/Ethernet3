@@ -76,7 +76,7 @@ jobs:
               env:
                   PLATFORMIO_AUTH_TOKEN: ${{ secrets.PLATFORMIO_AUTH_TOKEN }}
               run: |
-                  echo "$PLATFORMIO_AUTH_TOKEN" | pio account login --username "${{ secrets.PLATFORMIO_USERNAME }}" --password -
+                  echo "$PLATFORMIO_AUTH_TOKEN" | pio account login --username "${{ secrets.PLATFORMIO_USERNAME }}" --password - || true
 
             - name: Package Library
               run: |
