@@ -5,21 +5,114 @@ This guide helps you migrate existing Arduino Ethernet library code to the enhan
 ## Table of Contents
 
 1. [Quick Migration Checklist](#quick-migration-checklist)
-2. [Basic Setup Changes](#basic-setup-changes)
-3. [Class and Method Changes](#class-and-method-changes)
-4. [Common Migration Patterns](#common-migration-patterns)
-5. [New Features to Consider](#new-features-to-consider)
-6. [Troubleshooting Migration Issues](#troubleshooting-migration-issues)
+2. [Migration Options](#migration-options)
+3. [Option 1: Backwards Compatibility Mode (Easiest)](#option-1-backwards-compatibility-mode-easiest)
+4. [Option 2: Modern Dependency Injection (Recommended)](#option-2-modern-dependency-injection-recommended)
+5. [Class and Method Changes](#class-and-method-changes)
+6. [Common Migration Patterns](#common-migration-patterns)
+7. [New Features to Consider](#new-features-to-consider)
+8. [Troubleshooting Migration Issues](#troubleshooting-migration-issues)
 
 ## Quick Migration Checklist
 
+**Choose your migration approach:**
+
+**Option 1: Backwards Compatibility Mode (Easiest)**
+-   [ ] Add `#define ETHERNET_BACKWARDS_COMPATIBILITY` before includes
+-   [ ] Update include from `<Ethernet.h>` to `<Ethernet3.h>`
+-   [ ] Test basic functionality
+
+**Option 2: Modern Dependency Injection (Recommended)**
 -   [ ] Update include statements
 -   [ ] Replace singleton `Ethernet` with `EthernetClass` instance
 -   [ ] Add chip interface (W5500, W5100, etc.)
 -   [ ] Update client/server instantiation
 -   [ ] Test basic functionality
 
-## Basic Setup Changes
+## Migration Options
+
+Ethernet3 provides two migration paths to accommodate different needs:
+
+### Option 1: Backwards Compatibility Mode
+- **Best for**: Quick migration, existing projects, learning
+- **Pros**: Minimal code changes, familiar API
+- **Cons**: Uses global singletons, less flexible than modern approach
+
+### Option 2: Modern Dependency Injection
+- **Best for**: New projects, maximum flexibility, multiple chip support
+- **Pros**: Better testability, multiple instances, explicit dependencies
+- **Cons**: More verbose, requires understanding of dependency injection
+
+## Option 1: Backwards Compatibility Mode (Easiest)
+
+This mode provides global singleton instances and simplified constructors that match older Ethernet library APIs.
+
+### Step 1: Enable Compatibility Mode
+
+Add this define before including Ethernet3:
+
+```cpp
+#define ETHERNET_BACKWARDS_COMPATIBILITY
+#include <Ethernet3.h>  // Changed from <Ethernet.h>
+```
+
+### Step 2: Use Familiar API
+
+Your existing code should work with minimal changes:
+
+**Before (Arduino Ethernet):**
+```cpp
+#include <SPI.h>
+#include <Ethernet.h>
+
+byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
+EthernetClient client;
+EthernetServer server(80);
+
+void setup() {
+    if (Ethernet.begin(mac) == 0) {
+        Serial.println("Failed to configure Ethernet using DHCP");
+    }
+    server.begin();
+    Serial.print("My IP address: ");
+    Serial.println(Ethernet.localIP());
+}
+```
+
+**After (Ethernet3 with Backwards Compatibility):**
+```cpp
+#define ETHERNET_BACKWARDS_COMPATIBILITY  // Add this line
+#include <SPI.h>
+#include <Ethernet3.h>  // Changed from <Ethernet.h>
+
+byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
+EthernetClient client;      // No changes needed!
+EthernetServer server(80);  // No changes needed!
+
+void setup() {
+    if (Ethernet.begin(mac) == 0) {  // No changes needed!
+        Serial.println("Failed to configure Ethernet using DHCP");
+    }
+    server.begin();
+    Serial.print("My IP address: ");
+    Serial.println(Ethernet.localIP());  // No changes needed!
+}
+```
+
+### Global Instances Available
+
+When backwards compatibility is enabled, these global instances are available:
+- `W5500 defaultChip` - Uses CS pin 10
+- `EthernetClass Ethernet` - Global ethernet instance
+
+### Simplified Constructors Available
+
+- `EthernetClient()` and `EthernetClient(uint8_t sock)`
+- `EthernetServer(uint16_t port)`
+- `EthernetUDP()`
+- `DNSClient()` and `DNSClient(unsigned long timeout)`
+
+## Option 2: Modern Dependency Injection (Recommended)
 
 ### Include Statements
 
@@ -213,22 +306,37 @@ void loop() {
 
 **Error:** `'Ethernet' was not declared in this scope`
 
-**Solution:** Replace singleton usage with instance:
+**Solution 1 (Backwards Compatibility):** Enable compatibility mode:
+```cpp
+#define ETHERNET_BACKWARDS_COMPATIBILITY
+#include <Ethernet3.h>
 
+// Now you can use:
+Ethernet.begin(mac);
+```
+
+**Solution 2 (Modern):** Replace singleton usage with instance:
 ```cpp
 // Wrong
 Ethernet.begin(mac);
 
 // Correct
 EthernetClass ethernet(&chip);
-
 ethernet.begin(mac);
 ```
 
 **Error:** `no matching function for call to 'EthernetClient::EthernetClient()'`
 
-**Solution:** Provide required parameters:
+**Solution 1 (Backwards Compatibility):** Enable compatibility mode:
+```cpp
+#define ETHERNET_BACKWARDS_COMPATIBILITY
+#include <Ethernet3.h>
 
+// Now you can use:
+EthernetClient client;
+```
+
+**Solution 2 (Modern):** Provide required parameters:
 ```cpp
 // Wrong
 EthernetClient client;
@@ -267,3 +375,76 @@ void loop() {
 **Problem:** Running out of memory
 
 **Solution:** The Ethernet3 library is designed to be more memory-efficient, but ensure you're not creating unnecessary instances and clean up connections properly.
+
+## Migrating Between Ethernet3 Modes
+
+### From Backwards Compatibility to Modern Mode
+
+To migrate from backwards compatibility to the modern approach:
+
+1. Remove the `#define ETHERNET_BACKWARDS_COMPATIBILITY` line
+2. Create explicit chip and ethernet instances
+3. Pass these instances to all constructors
+
+**Before (Backwards Compatibility):**
+```cpp
+#define ETHERNET_BACKWARDS_COMPATIBILITY
+#include <Ethernet3.h>
+
+EthernetClient client;
+EthernetServer server(80);
+
+void setup() {
+    Ethernet.begin(mac);
+}
+```
+
+**After (Modern):**
+```cpp
+#include <Ethernet3.h>
+#include <chips/w5500.h>
+
+W5500 chip(10);
+EthernetClass ethernet(&chip);
+EthernetClient client(&ethernet, &chip);
+EthernetServer server(&ethernet, &chip, 80);
+
+void setup() {
+    ethernet.begin(mac);
+}
+```
+
+### From Modern to Backwards Compatibility Mode
+
+To migrate from modern to backwards compatibility mode:
+
+1. Add the `#define ETHERNET_BACKWARDS_COMPATIBILITY` line
+2. Remove explicit chip and ethernet instances
+3. Remove parameters from constructors
+4. Use global `Ethernet` instance
+
+**Before (Modern):**
+```cpp
+#include <Ethernet3.h>
+#include <chips/w5500.h>
+
+W5500 chip(10);
+EthernetClass ethernet(&chip);
+EthernetClient client(&ethernet, &chip);
+
+void setup() {
+    ethernet.begin(mac);
+}
+```
+
+**After (Backwards Compatibility):**
+```cpp
+#define ETHERNET_BACKWARDS_COMPATIBILITY
+#include <Ethernet3.h>
+
+EthernetClient client;
+
+void setup() {
+    Ethernet.begin(mac);
+}
+```

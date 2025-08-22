@@ -1,5 +1,83 @@
 # Ethernet3 API Reference
 
+## Backwards Compatibility Mode
+
+Ethernet3 supports an optional backwards compatibility mode that provides global singleton instances and simplified constructors, similar to older Ethernet libraries.
+
+### Enabling Backwards Compatibility
+
+To enable backwards compatibility mode, define `ETHERNET_BACKWARDS_COMPATIBILITY` before including the library:
+
+```cpp
+#define ETHERNET_BACKWARDS_COMPATIBILITY
+#include <Ethernet3.h>
+```
+
+### Global Instances
+
+When backwards compatibility mode is enabled, the following global instances are automatically available:
+
+- `W5500 defaultChip` - Default W5500 chip instance using CS pin 10
+- `EthernetClass Ethernet` - Global ethernet instance using the default chip
+
+### Simplified Constructors
+
+In backwards compatibility mode, all major classes provide simplified constructors:
+
+#### EthernetClient
+```cpp
+EthernetClient()                    // Default constructor
+EthernetClient(uint8_t sock)        // Constructor with socket number
+```
+
+#### EthernetServer
+```cpp
+EthernetServer(uint16_t port)       // Constructor with port only
+```
+
+#### EthernetUDP
+```cpp
+EthernetUDP()                       // Default constructor
+```
+
+#### DNSClient
+```cpp
+DNSClient()                         // Default constructor
+DNSClient(unsigned long timeout)    // Constructor with timeout
+```
+
+#### DhcpClass
+```cpp
+DhcpClass(unsigned long timeout, unsigned long responseTimeout)  // Constructor with timeouts
+```
+
+### Example Usage
+
+```cpp
+#define ETHERNET_BACKWARDS_COMPATIBILITY
+#include <Ethernet3.h>
+#include <SPI.h>
+
+byte mac[] = {0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02};
+
+// Simple constructors - no parameters needed
+EthernetClient client;
+EthernetServer server(80);
+EthernetUDP udp;
+
+void setup() {
+  // Use global Ethernet instance
+  if (Ethernet.begin(mac) == 0) {
+    Serial.println("Failed to configure Ethernet using DHCP");
+    for (;;);
+  }
+  
+  server.begin();
+  Serial.print("Server is at ");
+  Serial.println(Ethernet.localIP());
+}
+```
+
 ## Core Classes
 
 ### EthernetClass
@@ -83,6 +161,12 @@ EthernetClient(EthernetClass* eth, EthernetChip* chip)
 EthernetClient(EthernetClass* eth, EthernetChip* chip, uint8_t sock)
 ```
 
+**Backwards Compatible Constructors** (when `ETHERNET_BACKWARDS_COMPATIBILITY` is defined):
+```cpp
+EthernetClient()                    // Uses global instances
+EthernetClient(uint8_t sock)        // Uses global instances with specific socket
+```
+
 #### Connection Methods
 
 ```cpp
@@ -128,6 +212,11 @@ TCP server class for accepting incoming connections.
 EthernetServer(EthernetClass* eth, EthernetChip* chip, uint16_t port)
 ```
 
+**Backwards Compatible Constructor** (when `ETHERNET_BACKWARDS_COMPATIBILITY` is defined):
+```cpp
+EthernetServer(uint16_t port)       // Uses global instances
+```
+
 #### Server Methods
 
 ```cpp
@@ -145,6 +234,11 @@ UDP communication class with multicast support.
 
 ```cpp
 EthernetUDP(EthernetClass* eth, EthernetChip* chip)
+```
+
+**Backwards Compatible Constructor** (when `ETHERNET_BACKWARDS_COMPATIBILITY` is defined):
+```cpp
+EthernetUDP()                       // Uses global instances
 ```
 
 #### Socket Management
@@ -269,6 +363,12 @@ DNS resolution client for hostname-to-IP conversion.
 DNSClient(EthernetClass* eth, EthernetChip* chip)
 ```
 
+**Backwards Compatible Constructors** (when `ETHERNET_BACKWARDS_COMPATIBILITY` is defined):
+```cpp
+DNSClient()                         // Uses global instances
+DNSClient(unsigned long timeout)    // Uses global instances with timeout
+```
+
 #### Methods
 
 ```cpp
@@ -337,3 +437,22 @@ Use `EthernetClient::status()` to get detailed socket state information for debu
 ### DHCP Troubleshooting
 
 Monitor `EthernetClass::maintain()` return values to detect and handle DHCP lease issues proactively.
+
+## Examples
+
+The Ethernet3 library includes several examples demonstrating different usage patterns:
+
+### Backwards Compatibility Examples
+- `BackwardsCompatibilityTest` - Demonstrates simplified API usage with global instances
+
+### Modern API Examples  
+- `WebServer` - Basic web server using dependency injection
+- `WebClient` - HTTP client example
+- `ChatServer` - Multi-client chat server
+- `UDPSendReceiveString` - UDP communication example
+
+### Advanced Examples
+- `AdvancedChatServer` - Enhanced chat server with advanced features
+- `MulticastSender`/`MulticastReceiver` - Multicast UDP communication
+
+For detailed migration guidance, see the [Migration Guide](migration-guide.md).

@@ -71,6 +71,11 @@ Ethernet.begin(mac);
 W5500 chip(10);  // CS pin 10
 EthernetClass ethernet(&chip);
 ethernet.begin(mac);
+
+// OR use backwards compatibility mode for easy migration
+#define ETHERNET_BACKWARDS_COMPATIBILITY
+#include <Ethernet3.h>
+// Now you can use: Ethernet.begin(mac);
 ```
 
 #### 2. Non-Singleton Design
@@ -150,6 +155,6 @@ See examples for usage patterns.
 
 ## Next Steps
 
--   Review the [API Reference](api-reference.md) for detailed function documentation
--   See the [Migration Guide](migration-guide.md) for porting existing code
--   Browse [Examples](examples/) for practical usage patterns
+- Review the [API Reference](docs/api-reference.md) for detailed function documentation and backwards compatibility options
+- See the [Migration Guide](docs/migration-guide.md) for porting existing code with multiple migration options
+- Browse [Examples](examples/) for practical usage patterns including backwards compatibility
