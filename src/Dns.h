@@ -5,11 +5,22 @@
 #ifndef DNSClient_h
 #define DNSClient_h
 
-#include <EthernetUdp2.h>
+#include <Arduino.h>
+#include <string.h>
 
-class DNSClient
-{
-public:
+#include "Ethernet3.h"
+#include "EthernetUdp2.h"
+#include "chips/utility/socket.h"
+#include "chips/utility/wiznet_registers.h"
+#include "chips/w5500.h"
+
+// Forward declare the class to break the circular dependency.
+class EthernetClass;
+class DNSClient {
+   public:
+    DNSClient(EthernetClass* eth, EthernetChip* chip);
+    DNSClient(EthernetClass* eth, EthernetChip* chip, unsigned long timeout);
+
     // ctor
     void begin(const IPAddress& aDNSServer);
 
@@ -19,7 +30,7 @@ public:
         @result 1 if aIPAddrString was successfully converted to an IP address,
                 else error code
     */
-    int inet_aton(const char *aIPAddrString, IPAddress& aResult);
+    int inet_aton(const char* aIPAddrString, IPAddress& aResult);
 
     /** Resolve the given hostname to an IP address.
         @param aHostname Name to be resolved
@@ -29,7 +40,9 @@ public:
     */
     int getHostByName(const char* aHostname, IPAddress& aResult);
 
-protected:
+   protected:
+    EthernetClass* _ethernet;  // Pointer to the Ethernet class instance
+    EthernetChip* _chip;       // Pointer to the Ethernet chip interface
     uint16_t BuildRequest(const char* aName);
     uint16_t ProcessResponse(uint16_t aTimeout, IPAddress& aAddress);
 
