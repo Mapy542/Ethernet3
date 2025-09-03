@@ -1,6 +1,6 @@
 # Ethernet3 Library Documentation
 
-[![PlatformIO Registry](https://badges.registry.platformio.org/packages/ethernet3/library/Ethernet3.svg)](https://registry.platformio.org/libraries/ethernet3/Ethernet3)
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/mapy5542/library/Ethernet3.svg)](https://registry.platformio.org/libraries/mapy5542/Ethernet3)
 [![GitHub release](https://img.shields.io/github/release/Mapy542/Ethernet3.svg)](https://github.com/Mapy542/Ethernet3/releases)
 [![License: LGPL v2.1](https://img.shields.io/badge/License-LGPL%20v2.1-blue.svg)](https://www.gnu.org/licenses/lgpl-2.1)
 
